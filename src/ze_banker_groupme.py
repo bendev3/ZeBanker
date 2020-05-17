@@ -8,8 +8,6 @@ import argparse
 
 BOT_ID = "52ffe9618e4c11409b9b0bb089"
 API_ENDPOINT = "https://api.groupme.com/v3/bots/post"
-GROUP_ID = 11395
-NUM_TABLES = None
 
 class zeBanker:
     def __init__(self, arguments):
@@ -25,7 +23,7 @@ class zeBanker:
         else:
             log("files argument not provided, retrieving files from Donkhouse")
             msgs = banker.run_external()
-        self.send_groupme_message(msgs)
+        self.send_groupme_messages(msgs)
 
     def run_local(self):
         ps = PokerSplit(self.files)
@@ -45,16 +43,17 @@ class zeBanker:
                 return ps.run()
             else:
                 log("No files were retrieved. Likely no new games since last run.")
-                return None
+                return []
         except Exception as e:
             msgs = ["Error occurred retrieving results:{}".format(e)]
             log(msgs)
             return msgs
 
-    def send_groupme_message(self, messages):
+    def send_groupme_messages(self, messages):
+        log("Attempting to send messages...")
         if len(messages) > 0:
             for message in messages:
-                log("Attempting to send message...\n{}".format(message))
+                log(message, 1)
                 if message is not None:
                     data = {'bot_id': BOT_ID, 'text': message}
                     # sending post request and saving response as response object
@@ -64,6 +63,8 @@ class zeBanker:
                         log("Could not send GroupmeMesage, error:{}".format(e))
                 else:
                     log("Message is None, not sending.")
+        else:
+            log("Messages length is 0")
 
 
 if __name__ == "__main__":

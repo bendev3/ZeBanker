@@ -8,13 +8,14 @@ import os
 from utils import log
 import os
 
+BASE_URL = "https://donkhouse.com/group"
+
 class SiteReader:
     def __init__(self, group_id, num_recent_tables, download_dir):
         self.group_id = group_id
         self.num_recent_tables = num_recent_tables
         self.download_dir = download_dir
         self.output_dir = os.path.abspath(os.path.join(download_dir, "../"))
-        self.base_url = "https://donkhouse.com/group"
         self.cookies = pickle.load(open(os.path.join(self.output_dir, "cookies.pkl"), "rb"))
         self.driver = None
         self.latest_tables = self.get_latest_tables()
@@ -31,7 +32,7 @@ class SiteReader:
 
     def get_tables(self):
         tables = []
-        group_url = "{}/{}".format(self.base_url, self.group_id)
+        group_url = "{}/{}".format(BASE_URL, self.group_id)
         s = requests.Session()
         for cookie in self.cookies:
             s.cookies.set(cookie['name'], cookie['value'])
@@ -50,12 +51,12 @@ class SiteReader:
             log("Getting the most recent {} table(s) for group {}".format(self.num_recent_tables, self.group_id), 0)
             return self.get_tables()[-1 * self.num_recent_tables:]
 
-        old_table_list_filename = "old_tables.pkl"
         new_table_list = self.get_tables()
         try:
-            old_table_list = pickle.load(open(os.path.join(self.output_dir, old_table_list_filename), "rb"))
-            new_tables = list(set(new_table_list) - set(old_table_list))
-            pickle.dump(new_table_list, open(old_table_list_filename, "wb"))
+            old_table_list_filename = "old_tables.pkl"
+            old_tables = pickle.load(open(os.path.join(self.output_dir, old_table_list_filename), "rb"))
+            new_tables = list(set(new_table_list) - set(old_tables))
+            pickle.dump(new_table_list, open(os.path.join(self.output_dir, old_table_list_filename), "wb"))
             log("Found {} new tables since the last table backup. Tables: {}".format(len(new_tables), new_tables))
             return new_tables
         except Exception as e:
@@ -76,7 +77,6 @@ class SiteReader:
         self.driver.quit()
 
     def run(self):
-        log("Running site reader")
         if len(self.latest_tables) > 0:
             try:
                 self.init_selenium_driver()
