@@ -5,18 +5,21 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import pickle
 import os
-from utils import log
+from utils import log, download_blob, upload_blob
 import os
 
 BASE_URL = "https://donkhouse.com/group"
 
 class SiteReader:
-    def __init__(self, group_id, num_recent_tables, download_dir):
+    def __init__(self, group_id, download_dir, table_ids, num_recent_tables):
         self.group_id = group_id
-        self.num_recent_tables = num_recent_tables
         self.download_dir = download_dir
+        self.table_ids = table_ids
+        self.num_recent_tables = num_recent_tables
         self.output_dir = os.path.abspath(os.path.join(download_dir, "../"))
-        self.cookies = pickle.load(open(os.path.join(self.output_dir, "cookies.pkl"), "rb"))
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.join(self.output_dir,
+                                                                    "My First Project-de2a72e48858.json")
+        self.cookies = self.get_pickle_from_google_cloud("cookies.pkl")
         self.driver = None
         self.latest_tables = self.get_latest_tables()
 
@@ -29,6 +32,16 @@ class SiteReader:
         self.driver.get('https://donkhouse.com/group/11395/44476')
         for cookie in self.cookies:
             self.driver.add_cookie(cookie)
+
+    def get_pickle_from_google_cloud(self, name):
+        file_path = os.path.join(self.output_dir, name)
+        download_blob(name, file_path)
+        return pickle.load(open(file_path, "rb"))
+
+    def upload_pickle_to_google_cloud(self, object, name):
+        file_path = os.path.join(self.output_dir, name)
+        pickle.dump(object, open(file_path, "wb"))
+        upload_blob(file_path, name)
 
     def get_tables(self):
         tables = []
@@ -47,21 +60,24 @@ class SiteReader:
         return tables
 
     def get_latest_tables(self):
+        if self.table_ids is not None:
+            log("Getting table(s) {} for group {}".format(self.table_ids, self.group_id), 0)
+            return [table for table in self.get_tables() if table[0] in self.table_ids]
         if self.num_recent_tables is not None:
             log("Getting the most recent {} table(s) for group {}".format(self.num_recent_tables, self.group_id), 0)
             return self.get_tables()[-1 * self.num_recent_tables:]
 
         new_table_list = self.get_tables()
+        old_table_list_filename = "old_tables_{}.pkl".format(self.group_id)  # Group specific table list
         try:
-            old_table_list_filename = "old_tables.pkl"
-            old_tables = pickle.load(open(os.path.join(self.output_dir, old_table_list_filename), "rb"))
+            old_tables = self.get_pickle_from_google_cloud(old_table_list_filename)
             new_tables = list(set(new_table_list) - set(old_tables))
-            pickle.dump(new_table_list, open(os.path.join(self.output_dir, old_table_list_filename), "wb"))
+            self.upload_pickle_to_google_cloud(new_table_list, old_table_list_filename)
             log("Found {} new tables since the last table backup. Tables: {}".format(len(new_tables), new_tables))
             return new_tables
         except Exception as e:
             log("Error: {}. Likely no table backup. Backing up current table list.".format(e))
-            pickle.dump(new_table_list, open(os.path.join(self.output_dir, old_table_list_filename), "wb"))
+            self.upload_pickle_to_google_cloud(new_table_list, old_table_list_filename)
             return []
 
     def click_download_csv(self, table_id):
@@ -87,7 +103,7 @@ class SiteReader:
                 log("Exception: {}".format(e))
             self.finish()
         else:
-            log("No new tables to retrieve.")
+            log("No tables to retrieve.")
 
 """
 # run this once to store cookies for a specific login

@@ -88,7 +88,7 @@ class PokerSplit:
             player_nets_dict = self.check_for_cancellations(player_nets_dict)
 
     def check_for_zeros(self, player_nets_dict):
-        for player in player_nets_dict.keys():
+        for player in list(player_nets_dict):
             net = player_nets_dict[player]
             if net == 0:
                 del player_nets_dict[player]

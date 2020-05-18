@@ -6,15 +6,18 @@ from utils import log
 import os
 import argparse
 
-BOT_ID = "52ffe9618e4c11409b9b0bb089"
+#BOT_ID = "52ffe9618e4c11409b9b0bb089"
+BOT_ID = "7776823ffe53c6fd1af338db58"
 API_ENDPOINT = "https://api.groupme.com/v3/bots/post"
 
 class zeBanker:
     def __init__(self, arguments):
         self.files = arguments.files
         self.group_id = arguments.group_id
-        self.num_tables = arguments.num_tables
         self.output_dir = arguments.output_dir
+
+        self.num_tables = arguments.num_tables
+        self.table_ids = arguments.table_ids
 
     def run(self):
         if self.files:
@@ -31,23 +34,19 @@ class zeBanker:
 
     def run_external(self):
         log("Attempting to get results from Donkhouse")
-        try:
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M")
-            script_path = os.path.dirname(os.path.abspath(__file__))
-            download_dir = os.path.abspath(os.path.join(*[script_path, self.output_dir, timestamp]))
-            site_reader = SiteReader(self.group_id, self.num_tables, download_dir)
-            site_reader.run()
-            if os.path.isdir(download_dir):
-                file_paths = list(map(lambda file: os.path.join(download_dir, file), os.listdir(download_dir)))
-                ps = PokerSplit(file_paths)
-                return ps.run()
-            else:
-                log("No files were retrieved. Likely no new games since last run.")
-                return []
-        except Exception as e:
-            msgs = ["Error occurred retrieving results:{}".format(e)]
-            log(msgs)
-            return msgs
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M")
+        script_path = os.path.dirname(os.path.abspath(__file__))
+        download_dir = os.path.abspath(os.path.join(*[script_path, self.output_dir, timestamp]))
+        site_reader = SiteReader(self.group_id, download_dir, self.table_ids, self.num_tables)
+        site_reader.run()
+        if os.path.isdir(download_dir):
+            file_paths = list(map(lambda file: os.path.join(download_dir, file), os.listdir(download_dir)))
+            ps = PokerSplit(file_paths)
+            return ps.run()
+        else:
+            log("No files were retrieved. Likely no new games since last run.")
+            return []
+
 
     def send_groupme_messages(self, messages):
         log("Attempting to send messages...")
@@ -57,10 +56,7 @@ class zeBanker:
                 if message is not None:
                     data = {'bot_id': BOT_ID, 'text': message}
                     # sending post request and saving response as response object
-                    try:
-                        requests.post(url=API_ENDPOINT, data=data)
-                    except Exception as e:
-                        log("Could not send GroupmeMesage, error:{}".format(e))
+                    requests.post(url=API_ENDPOINT, data=data)
                 else:
                     log("Message is None, not sending.")
         else:
@@ -69,17 +65,15 @@ class zeBanker:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    # Files provided
-    parser.add_argument('-files', nargs='*', help="Files to pull results from")
-
     # Files need to be downloaded from Donkhouse
     parser.add_argument('-group_id', default=11395, help="Group ID to get files for")
-    # If provided, will retrieve only the num_tables number of recent tables.
-    # Otherwise, all the tables since the last backup will be retrieved
-    parser.add_argument('-num_tables', type=int, help="Number of most recent tables to get results from")
     parser.add_argument('-output_dir', default="../../Output", help="Directory to download files to, relative to script")
-    args = parser.parse_args()
+    """ Optional args to control which tables to get results from or where the table output files already exist """
+    parser.add_argument('-table_ids', nargs='*', help="Table ids to run results on")
+    parser.add_argument('-num_tables', type=int, help="Number of most recent tables to get results from")
+    parser.add_argument('-files', nargs='*', help="Files to pull results from")
 
+    args = parser.parse_args()
     log(args)
     banker = zeBanker(args)
     banker.run()
