@@ -5,7 +5,8 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import pickle
 import os
-from utils import log, download_blob, upload_blob
+from utils import log
+#from utils import download_blob, upload_blob
 import os
 
 BASE_URL = "https://donkhouse.com/group"
