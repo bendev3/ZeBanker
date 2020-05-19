@@ -13,6 +13,8 @@ def val_to_float(val):
     return 0 if val == '' else float(val)
 
 
+#  Not in use, leaving for now
+#
 def upload_blob(source_file_name, destination_blob_name):
     """Uploads a file to the bucket."""
     # source_file_name = "local/path/to/file"

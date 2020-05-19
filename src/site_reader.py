@@ -35,13 +35,13 @@ class SiteReader:
 
     def get_pickle_from_google_cloud(self, name):
         file_path = os.path.join(self.output_dir, name)
-        download_blob(name, file_path)
+        #download_blob(name, file_path)
         return pickle.load(open(file_path, "rb"))
 
     def upload_pickle_to_google_cloud(self, object, name):
         file_path = os.path.join(self.output_dir, name)
         pickle.dump(object, open(file_path, "wb"))
-        upload_blob(file_path, name)
+        #upload_blob(file_path, name)
 
     def get_tables(self):
         tables = []
