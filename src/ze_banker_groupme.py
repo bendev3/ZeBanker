@@ -45,6 +45,7 @@ class zeBanker:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M")
         script_path = os.path.dirname(os.path.abspath(__file__))
         download_dir = os.path.abspath(os.path.join(*[script_path, self.output_dir, timestamp]))
+
         site_reader = SiteReader(self.group_id, download_dir, self.table_ids, self.num_tables)
         site_reader.run()
         if os.path.isdir(download_dir):
