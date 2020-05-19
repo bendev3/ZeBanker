@@ -105,8 +105,9 @@ class SiteReader:
         else:
             log("No tables to retrieve.")
 
+
 """
-# run this once to store cookies for a specific login
+# run this once to store cookies for a login
 def one_time_get_cookies():
     driver = webdriver.Chrome()
     driver.get('https://donkhouse.com/group/11395/44476')

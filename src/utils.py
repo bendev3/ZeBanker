@@ -1,7 +1,7 @@
 from google.cloud import storage
 import os
 
-LOGLEVEL = 1
+LOGLEVEL = 2
 BUCKET_NAME = "ze_banker"
 
 def log(msg, level=0):

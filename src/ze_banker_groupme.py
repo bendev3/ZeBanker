@@ -5,9 +5,11 @@ import requests
 from utils import log
 import os
 import argparse
+import re
+import time
 
-#BOT_ID = "52ffe9618e4c11409b9b0bb089"
-BOT_ID = "7776823ffe53c6fd1af338db58"
+#BOT_ID = "e4808a5a0d7f8fd6ec06fe42bc"
+BOT_ID = "89997e88121f3d04ed8f9a7a2f"
 API_ENDPOINT = "https://api.groupme.com/v3/bots/post"
 
 class zeBanker:
@@ -15,6 +17,7 @@ class zeBanker:
         self.files = arguments.files
         self.group_id = arguments.group_id
         self.output_dir = arguments.output_dir
+        self.message = arguments.message
 
         self.num_tables = arguments.num_tables
         self.table_ids = arguments.table_ids
@@ -26,7 +29,12 @@ class zeBanker:
         else:
             log("files argument not provided, retrieving files from Donkhouse")
             msgs = banker.run_external()
-        self.send_groupme_messages(msgs)
+
+        if self.message:
+            self.send_groupme_messages(msgs)
+        else:
+            for msg in msgs:
+                print(msg)
 
     def run_local(self):
         ps = PokerSplit(self.files)
@@ -47,16 +55,17 @@ class zeBanker:
             log("No files were retrieved. Likely no new games since last run.")
             return []
 
-
     def send_groupme_messages(self, messages):
         log("Attempting to send messages...")
         if len(messages) > 0:
             for message in messages:
                 log(message, 1)
                 if message is not None:
-                    data = {'bot_id': BOT_ID, 'text': message}
+                    text = re.sub(' +', ' ', message)  # GroupMe messages don't format well
+                    data = {'bot_id': BOT_ID, 'text': text}
                     # sending post request and saving response as response object
-                    requests.post(url=API_ENDPOINT, data=data)
+                    r = requests.post(url=API_ENDPOINT, data=data)
+                    assert r.ok
                 else:
                     log("Message is None, not sending.")
         else:
@@ -68,6 +77,7 @@ if __name__ == "__main__":
     # Files need to be downloaded from Donkhouse
     parser.add_argument('-group_id', default=11395, help="Group ID to get files for")
     parser.add_argument('-output_dir', default="../../Output", help="Directory to download files to, relative to script")
+    parser.add_argument('-message', default=False, action='store_true', help="Send GroupMe message")
     """ Optional args to control which tables to get results from or where the table output files already exist """
     parser.add_argument('-table_ids', nargs='*', help="Table ids to run results on")
     parser.add_argument('-num_tables', type=int, help="Number of most recent tables to get results from")
