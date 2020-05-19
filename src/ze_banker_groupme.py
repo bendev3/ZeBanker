@@ -70,7 +70,7 @@ class zeBanker:
                 else:
                     log("Message is None, not sending.")
         else:
-            log("Messages length is 0")
+            log("No message to send")
 
 
 if __name__ == "__main__":

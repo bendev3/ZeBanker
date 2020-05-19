@@ -30,6 +30,7 @@ class SiteReader:
         # For linux, start display
         chrome_options = Options()
         prefs = {"download.default_directory": self.download_dir}
+        chrome_options.add_argument('--no-sandbox')
         chrome_options.add_experimental_option("prefs", prefs)
         chrome_options.add_argument("--headless")
         self.driver = webdriver.Chrome(options=chrome_options)
