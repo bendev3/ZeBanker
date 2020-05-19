@@ -96,6 +96,13 @@ class SiteReader:
         log("Quitting driver", 0)
         self.driver.quit()
 
+    def print_info_retrieved(self):
+        s = "Retrieved results for table(s): "
+        for t in self.latest_tables:
+            s += t[1] + ", "
+        return s[:-2]
+
+
     def run(self):
         if len(self.latest_tables) > 0:
             try:
@@ -108,6 +115,7 @@ class SiteReader:
             self.finish()
         else:
             log("No tables to retrieve.")
+        return [self.print_info_retrieved()]
 
 
 """

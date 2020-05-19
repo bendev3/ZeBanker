@@ -8,7 +8,9 @@ import argparse
 import re
 import time
 
+# Legit
 #BOT_ID = "e4808a5a0d7f8fd6ec06fe42bc"
+# Test
 BOT_ID = "89997e88121f3d04ed8f9a7a2f"
 API_ENDPOINT = "https://api.groupme.com/v3/bots/post"
 
@@ -47,11 +49,12 @@ class zeBanker:
         download_dir = os.path.abspath(os.path.join(*[script_path, self.output_dir, timestamp]))
 
         site_reader = SiteReader(self.group_id, download_dir, self.table_ids, self.num_tables)
-        site_reader.run()
+        site_reader_output = site_reader.run()
         if os.path.isdir(download_dir):
             file_paths = list(map(lambda file: os.path.join(download_dir, file), os.listdir(download_dir)))
             ps = PokerSplit(file_paths)
-            return ps.run()
+            poker_split_output = ps.run()
+            return site_reader_output + poker_split_output
         else:
             log("No files were retrieved. Likely no new games since last run.")
             return []
@@ -77,7 +80,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     # Files need to be downloaded from Donkhouse
     parser.add_argument('-group_id', default=11395, help="Group ID to get files for")
-    parser.add_argument('-output_dir', default="../../Output", help="Directory to download files to, relative to script")
+    parser.add_argument('-output_dir', default="../Output", help="Directory to download files to, relative to script")
     parser.add_argument('-message', default=False, action='store_true', help="Send GroupMe message")
     """ Optional args to control which tables to get results from or where the table output files already exist """
     parser.add_argument('-table_ids', nargs='*', help="Table ids to run results on")
