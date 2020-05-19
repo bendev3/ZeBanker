@@ -9,6 +9,7 @@ from utils import log
 #from utils import download_blob, upload_blob
 import os
 
+
 BASE_URL = "https://donkhouse.com/group"
 
 class SiteReader:
@@ -18,17 +19,18 @@ class SiteReader:
         self.table_ids = table_ids
         self.num_recent_tables = num_recent_tables
         self.output_dir = os.path.abspath(os.path.join(download_dir, "../"))
-        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.join(self.output_dir,
-                                                                    "My First Project-de2a72e48858.json")
+        #os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.join(self.output_dir, "My First Project-de2a72e48858.json")
         self.cookies = self.get_pickle_from_google_cloud("cookies.pkl")
         self.driver = None
         self.latest_tables = self.get_latest_tables()
 
     def init_selenium_driver(self):
         log("Initializing selenium driver with cookies.pkl file", 0)
+        # For linux, start display
         chrome_options = Options()
         prefs = {"download.default_directory": self.download_dir}
         chrome_options.add_experimental_option("prefs", prefs)
+        chrome_options.add_argument("--headless")
         self.driver = webdriver.Chrome(options=chrome_options)
         self.driver.get('https://donkhouse.com/group/11395/44476')
         for cookie in self.cookies:
