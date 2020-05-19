@@ -14,7 +14,7 @@ BASE_URL = "https://donkhouse.com/group"
 
 class SiteReader:
     def __init__(self, group_id, download_dir, table_ids, num_recent_tables):
-        log("Running SiteReader with group id {}, download dir {}, table ids {}, num tables {}".format(group_id, download_dir, table_ids, num_tables), 1)
+        log("Running SiteReader with group id {}, download dir {}, table ids {}, num tables {}".format(group_id, download_dir, table_ids, num_recent_tables), 1)
         self.group_id = group_id
         self.download_dir = download_dir
         self.table_ids = table_ids
