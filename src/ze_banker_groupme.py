@@ -9,9 +9,9 @@ import re
 import time
 
 # Legit
-#BOT_ID = "e4808a5a0d7f8fd6ec06fe42bc"
+BOT_ID = "e4808a5a0d7f8fd6ec06fe42bc"
 # Test
-BOT_ID = "89997e88121f3d04ed8f9a7a2f"
+#BOT_ID = "89997e88121f3d04ed8f9a7a2f"
 API_ENDPOINT = "https://api.groupme.com/v3/bots/post"
 
 class zeBanker:
