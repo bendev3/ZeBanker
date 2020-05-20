@@ -31,7 +31,7 @@ class SiteReader:
         chrome_options = Options()
         prefs = {"download.default_directory": self.download_dir}
         chrome_options.add_experimental_option("prefs", prefs)
-        chrome_options.add_argument("--headless")
+        #chrome_options.add_argument("--headless")
         self.driver = webdriver.Chrome(options=chrome_options)
         self.driver.get('https://donkhouse.com/group/11395/44476')
         for cookie in self.cookies:
@@ -86,7 +86,7 @@ class SiteReader:
 
     def click_download_csv(self, table_id):
         self.driver.get('https://donkhouse.com/group/{}/{}'.format(self.group_id, table_id))
-        time.sleep(6)  # wait for the browser/site to load before running the script
+        time.sleep(8)  # wait for the browser/site to load before running the script
         script = "socket.emit('download chip history request', {table_id:" + str(table_id) + "})"
         log("executing script:{}".format(script), 1)
         self.driver.execute_script(script)
