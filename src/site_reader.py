@@ -9,7 +9,6 @@ from utils import log
 #from utils import download_blob, upload_blob
 import os
 
-
 BASE_URL = "https://donkhouse.com/group"
 
 class SiteReader:
@@ -65,12 +64,13 @@ class SiteReader:
 
     def get_latest_tables(self):
         if self.table_ids is not None:
-            log("Getting table(s) {} for group {}".format(self.table_ids, self.group_id), 0)
+            log("Getting results from table(s) {} for group {}".format(self.table_ids, self.group_id), 0)
             return [table for table in self.get_tables() if table[0] in self.table_ids]
         if self.num_recent_tables is not None:
-            log("Getting the most recent {} table(s) for group {}".format(self.num_recent_tables, self.group_id), 0)
+            log("Getting results from the most recent {} table(s) for group {}".format(self.num_recent_tables, self.group_id), 0)
             return self.get_tables()[-1 * self.num_recent_tables:]
 
+        log("Getting results from all tables since last table backup")
         new_table_list = self.get_tables()
         old_table_list_filename = "old_tables_{}.pkl".format(self.group_id)  # Group specific table list
         try:
@@ -80,17 +80,17 @@ class SiteReader:
             log("Found {} new tables since the last table backup. Tables: {}".format(len(new_tables), new_tables))
             return new_tables
         except Exception as e:
-            log("Error: {}. Likely no table backup. Backing up current table list.".format(e))
+            log("Error: {}. Likely no table backup. Backing up current table list for future run.".format(e))
             self.upload_pickle_to_google_cloud(new_table_list, old_table_list_filename)
             return []
 
     def click_download_csv(self, table_id):
         self.driver.get('https://donkhouse.com/group/{}/{}'.format(self.group_id, table_id))
-        time.sleep(20)  # wait for the browser/site to load before running the script
+        time.sleep(30)  # wait for the browser/site to load before running the script
         script = "socket.emit('download chip history request', {table_id:" + str(table_id) + "})"
         log("executing script:{}".format(script), 1)
         self.driver.execute_script(script)
-        time.sleep(15)  # keep the browser open long enough to receive the csv from Donkhouse
+        time.sleep(25)  # keep the browser open long enough to receive the csv from Donkhouse
 
     def finish(self):
         log("Quitting driver", 0)
@@ -101,7 +101,6 @@ class SiteReader:
         for t in self.latest_tables:
             s += t[1] + ", "
         return s[:-2]
-
 
     def run(self):
         if len(self.latest_tables) > 0:

@@ -1,8 +1,6 @@
-#from google.cloud import storage
-import os
 
 LOGLEVEL = 2
-BUCKET_NAME = "ze_banker"
+
 
 def log(msg, level=0):
     if level <= LOGLEVEL:
@@ -14,8 +12,12 @@ def val_to_float(val):
 
 
 #  Not in use, leaving for now
-#
 """
+import os
+from google.cloud import storage
+
+BUCKET_NAME = "ze_banker"
+
 def upload_blob(source_file_name, destination_blob_name):
     # source_file_name = "local/path/to/file"
     # destination_blob_name = "storage-object-name"
