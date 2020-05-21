@@ -3,10 +3,8 @@ from bs4 import BeautifulSoup
 import time
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-import pickle
 import os
-from utils import log
-#from utils import download_blob, upload_blob
+from utils import log, get_pickle, set_pickle
 import os
 
 BASE_URL = "https://donkhouse.com/group"
@@ -20,7 +18,7 @@ class SiteReader:
         self.num_recent_tables = num_recent_tables
         self.output_dir = os.path.abspath(os.path.join(download_dir, "../"))
         #os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.join(self.output_dir, "My First Project-de2a72e48858.json")
-        self.cookies = self.get_pickle_from_google_cloud("cookies.pkl")
+        self.cookies = get_pickle(self.output_dir, "cookies.pkl")
         self.driver = None
         self.latest_tables = self.get_latest_tables()
 
@@ -35,16 +33,6 @@ class SiteReader:
         self.driver.get('https://donkhouse.com/group/11395/44476')
         for cookie in self.cookies:
             self.driver.add_cookie(cookie)
-
-    def get_pickle_from_google_cloud(self, name):
-        file_path = os.path.join(self.output_dir, name)
-        #download_blob(name, file_path)
-        return pickle.load(open(file_path, "rb"))
-
-    def upload_pickle_to_google_cloud(self, object, name):
-        file_path = os.path.join(self.output_dir, name)
-        pickle.dump(object, open(file_path, "wb"))
-        #upload_blob(file_path, name)
 
     def get_tables(self):
         tables = []
@@ -74,23 +62,24 @@ class SiteReader:
         new_table_list = self.get_tables()
         old_table_list_filename = "old_tables_{}.pkl".format(self.group_id)  # Group specific table list
         try:
-            old_tables = self.get_pickle_from_google_cloud(old_table_list_filename)
+            old_tables = get_pickle(self.output_dir, old_table_list_filename)
             new_tables = list(set(new_table_list) - set(old_tables))
-            self.upload_pickle_to_google_cloud(new_table_list, old_table_list_filename)
+            set_pickle(new_table_list, self.output_dir, old_table_list_filename)
             log("Found {} new tables since the last table backup. Tables: {}".format(len(new_tables), new_tables))
             return new_tables
         except Exception as e:
             log("Error: {}. Likely no table backup. Backing up current table list for future run.".format(e))
-            self.upload_pickle_to_google_cloud(new_table_list, old_table_list_filename)
+            set_pickle(new_table_list, self.output_dir, old_table_list_filename)
             return []
 
     def click_download_csv(self, table_id):
+        # Maybe need to sleep here?
         self.driver.get('https://donkhouse.com/group/{}/{}'.format(self.group_id, table_id))
-        time.sleep(30)  # wait for the browser/site to load before running the script
+        time.sleep(3)  # wait for the browser/site to load before running the script
         script = "socket.emit('download chip history request', {table_id:" + str(table_id) + "})"
         log("executing script:{}".format(script), 1)
         self.driver.execute_script(script)
-        time.sleep(25)  # keep the browser open long enough to receive the csv from Donkhouse
+        time.sleep(3)  # keep the browser open long enough to receive the csv from Donkhouse
 
     def finish(self):
         log("Quitting driver", 0)

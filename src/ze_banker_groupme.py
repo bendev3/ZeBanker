@@ -1,39 +1,30 @@
 from poker_split import PokerSplit
 from site_reader import SiteReader
 from datetime import datetime
-import requests
-from utils import log
+from utils import log, send_groupme_messages
 import os
 import argparse
-import re
 import time
 
-# Legit
-BOT_ID = "e4808a5a0d7f8fd6ec06fe42bc"
-# Test
-#BOT_ID = "89997e88121f3d04ed8f9a7a2f"
-API_ENDPOINT = "https://api.groupme.com/v3/bots/post"
-
 class zeBanker:
-    def __init__(self, arguments):
-        self.files = arguments.files
-        self.group_id = arguments.group_id
-        self.output_dir = arguments.output_dir
-        self.message = arguments.message
-
-        self.num_tables = arguments.num_tables
-        self.table_ids = arguments.table_ids
+    def __init__(self, files, group_id, output_dir, message, num_tables, table_ids):
+        self.files = files
+        self.group_id = group_id
+        self.output_dir = output_dir
+        self.message = message
+        self.num_tables = num_tables
+        self.table_ids = table_ids
 
     def run(self):
         if self.files:
             log("files argument provided, running on existing files")
-            msgs = banker.run_local()
+            msgs = self.run_local()
         else:
             log("files argument not provided, retrieving files from Donkhouse")
-            msgs = banker.run_external()
+            msgs = self.run_external()
 
         if self.message:
-            self.send_groupme_messages(msgs)
+            send_groupme_messages(msgs)
         else:
             for msg in msgs:
                 print(msg)
@@ -59,22 +50,6 @@ class zeBanker:
             log("No files were retrieved. Likely no new games since last run.")
             return []
 
-    def send_groupme_messages(self, messages):
-        log("Attempting to send messages...")
-        if len(messages) > 0:
-            for message in messages:
-                log(message, 1)
-                if message is not None:
-                    text = re.sub(' +', ' ', message)  # GroupMe messages don't format well
-                    data = {'bot_id': BOT_ID, 'text': text}
-                    # sending post request and saving response as response object
-                    r = requests.post(url=API_ENDPOINT, data=data)
-                    assert r.ok
-                else:
-                    log("Message is None, not sending.")
-        else:
-            log("No message to send")
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -89,5 +64,5 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     log(args)
-    banker = zeBanker(args)
+    banker = zeBanker(args.files, args.group_id, args.output_dir, args.message, args.num_tables, args.table_ids)
     banker.run()

@@ -1,3 +1,13 @@
+import os
+import pickle
+import re
+import requests
+
+# Legit
+#BOT_ID = "e4808a5a0d7f8fd6ec06fe42bc"
+# Test
+BOT_ID = "89997e88121f3d04ed8f9a7a2f"
+API_ENDPOINT = "https://api.groupme.com/v3/bots/post"
 
 LOGLEVEL = 2
 
@@ -11,29 +21,28 @@ def val_to_float(val):
     return 0 if val == '' else float(val)
 
 
-#  Not in use, leaving for now
-"""
-import os
-from google.cloud import storage
-
-BUCKET_NAME = "ze_banker"
-
-def upload_blob(source_file_name, destination_blob_name):
-    # source_file_name = "local/path/to/file"
-    # destination_blob_name = "storage-object-name"
-    log("Uploading {} to google cloud as {}".format(source_file_name, destination_blob_name), 1)
-    storage_client = storage.Client()
-    bucket = storage_client.bucket(BUCKET_NAME)
-    blob = bucket.blob(destination_blob_name)
-    blob.upload_from_filename(source_file_name)
+def get_pickle(output_dir, name):
+    file_path = os.path.join(output_dir, name)
+    return pickle.load(open(file_path, "rb"))
 
 
-def download_blob(source_blob_name, destination_file_name):
-    # source_blob_name = "storage-object-name"
-    # destination_file_name = "local/path/to/file"
-    log("Downloading {} from google cloud to {}".format(source_blob_name, destination_file_name), 1)
-    storage_client = storage.Client()
-    bucket = storage_client.bucket(BUCKET_NAME)
-    blob = bucket.blob(source_blob_name)
-    blob.download_to_filename(destination_file_name)
-"""
+def set_pickle(object, output_dir, name):
+    file_path = os.path.join(output_dir, name)
+    pickle.dump(object, open(file_path, "wb"))
+
+
+def send_groupme_messages(messages):
+    log("Attempting to send messages...")
+    if len(messages) > 0:
+        for message in messages:
+            log(message, 1)
+            if message is not None:
+                text = re.sub(' +', ' ', message)  # GroupMe messages don't format well
+                data = {'bot_id': BOT_ID, 'text': text}
+                # sending post request and saving response as response object
+                r = requests.post(url=API_ENDPOINT, data=data)
+                assert r.ok
+            else:
+                log("Message is None, not sending.")
+    else:
+        log("No message to send")
