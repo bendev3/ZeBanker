@@ -5,8 +5,8 @@ from utils import get_pickle, set_pickle, send_groupme_messages, log
 import os
 
 token = ""
-groupme_group_id = "59674981"
-#groupme_group_id = "59842005"
+#groupme_group_id = "59674981"
+groupme_group_id = "59842005"
 group_id = 13852
 output_dir = "../Output"
 message = True
