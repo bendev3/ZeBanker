@@ -49,7 +49,7 @@ class ReactiveBanker:
                 log("New message found {}:{}".format(msg.id, msg.text), 2)
                 if "!results" in msg.text:
                     if msg.text == "!results":
-                        send_groupme_messages(["Ok {}, getting results from any new tables if they exist.".format(msg.name)])
+                        send_groupme_messages(["Ok {}, getting results from any new tables if there are any.".format(msg.name)])
                         self.banker = zeBanker(None, group_id, output_dir, True, None, None)
                     else:
                         num_tables = int(msg.text.replace("!results", ""))
