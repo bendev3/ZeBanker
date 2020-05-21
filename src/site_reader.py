@@ -17,7 +17,6 @@ class SiteReader:
         self.table_ids = table_ids
         self.num_recent_tables = num_recent_tables
         self.output_dir = os.path.abspath(os.path.join(download_dir, "../"))
-        #os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.join(self.output_dir, "My First Project-de2a72e48858.json")
         self.cookies = get_pickle(self.output_dir, "cookies.pkl")
         self.driver = None
         self.latest_tables = self.get_latest_tables()
@@ -33,6 +32,7 @@ class SiteReader:
         self.driver.get('https://donkhouse.com/group/11395/44476')
         for cookie in self.cookies:
             self.driver.add_cookie(cookie)
+        time.sleep(2)
 
     def get_tables(self):
         tables = []
@@ -73,7 +73,6 @@ class SiteReader:
             return []
 
     def click_download_csv(self, table_id):
-        # Maybe need to sleep here?
         self.driver.get('https://donkhouse.com/group/{}/{}'.format(self.group_id, table_id))
         time.sleep(30)  # wait for the browser/site to load before running the script
         script = "socket.emit('download chip history request', {table_id:" + str(table_id) + "})"

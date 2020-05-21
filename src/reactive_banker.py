@@ -43,7 +43,7 @@ class ReactiveBanker:
         self.new_messages = set(messages_to_check)
 
     def get_banker(self):
-        log("Checking for a command in new messages")
+        log("Parsing messages and constructing zeBanker object")
         for msg in self.groupme_group.messages.list():
             if msg.id in self.new_messages:
                 log("New message found {}:{}".format(msg.id, msg.text), 2)
