@@ -75,11 +75,11 @@ class SiteReader:
     def click_download_csv(self, table_id):
         # Maybe need to sleep here?
         self.driver.get('https://donkhouse.com/group/{}/{}'.format(self.group_id, table_id))
-        time.sleep(3)  # wait for the browser/site to load before running the script
+        time.sleep(30)  # wait for the browser/site to load before running the script
         script = "socket.emit('download chip history request', {table_id:" + str(table_id) + "})"
         log("executing script:{}".format(script), 1)
         self.driver.execute_script(script)
-        time.sleep(3)  # keep the browser open long enough to receive the csv from Donkhouse
+        time.sleep(25)  # keep the browser open long enough to receive the csv from Donkhouse
 
     def finish(self):
         log("Quitting driver", 0)
