@@ -5,9 +5,9 @@ from utils import get_pickle, set_pickle, send_groupme_messages, log
 import os
 
 token = ""
-#groupme_group_id = "59674981"
-groupme_group_id = "59842005"
-group_id = 13852
+groupme_group_id = "59674981"
+#groupme_group_id = "59842005"
+group_id = 11395
 
 script_path = os.path.dirname(os.path.abspath(__file__))
 output_dir = os.path.join(script_path, "../Output")
