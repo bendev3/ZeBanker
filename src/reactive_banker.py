@@ -8,7 +8,10 @@ token = ""
 #groupme_group_id = "59674981"
 groupme_group_id = "59842005"
 group_id = 13852
-output_dir = "../Output"
+
+script_path = os.path.dirname(os.path.abspath(__file__))
+output_dir = os.path.join(script_path, "../Output")
+
 message = True
 
 class ReactiveBanker:
