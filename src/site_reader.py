@@ -102,6 +102,7 @@ class SiteReader:
             self.finish()
         else:
             log("No tables to retrieve.")
+        assert len(os.listdir(self.download_dir)) == len(self.latest_tables)
         return [self.print_info_retrieved()]
 
 
