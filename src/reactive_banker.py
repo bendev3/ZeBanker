@@ -4,6 +4,7 @@ import argparse
 from utils import get_pickle, set_pickle, send_groupme_messages, log
 import os
 import configparser
+import time
 
 script_path = os.path.dirname(os.path.abspath(__file__))
 
@@ -43,7 +44,7 @@ class ReactiveBanker:
         self.new_messages = set(messages_to_check)
 
     def get_banker(self):
-        log("Parsing messages and constructing zeBanker object")
+        log("Parsing messages and potentially constructing zeBanker object")
         for msg in self.groupme_group.messages.list():
             if msg.id in self.new_messages:
                 log("New message found {}:{}".format(msg.id, msg.text), 2)
@@ -71,6 +72,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     cfg = configparser.ConfigParser()
     cfg.read(args.c)
-
     reactive_banker = ReactiveBanker(cfg)
+
     reactive_banker.run()
+

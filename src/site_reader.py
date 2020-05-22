@@ -80,6 +80,7 @@ class SiteReader:
                 self.driver.execute_script("game.info_widget.download_button")  # check if we have a download button
                 break  # super hacky but if we do have a download button break the loop and continue
             except Exception as e:
+                log("Site not loaded yet", 2)
                 pass
             time.sleep(.2)
 
@@ -91,10 +92,12 @@ class SiteReader:
         if not os.path.exists(self.download_dir):
             for i in range(300):
                 if not os.path.exists(self.download_dir):
+                    log("No directory / first file yet")
                     time.sleep(.2)
         else:
             for i in range(300):
                 if self.num_files_retrieved == len(os.listdir(self.download_dir)):
+                    log("Next file not loaded yet")
                     time.sleep(.2)  # wait for file to download
 
         self.num_files_retrieved += 1  # another file was retrieved
@@ -125,6 +128,7 @@ class SiteReader:
 
         if len(self.latest_tables) > 0:
             assert os.path.exists(self.download_dir)  # make sure we got all the files we said we got
+            log("Checking that num files {} equals num tables {}".format(len(os.listdir(self.download_dir)), len(self.latest_tables)))
             assert len(os.listdir(self.download_dir)) == len(self.latest_tables)
 
         return [self.print_info_retrieved()]
