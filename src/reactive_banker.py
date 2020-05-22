@@ -55,7 +55,7 @@ class ReactiveBanker:
             if msg.id in self.new_messages:
                 log("New message found {}:{}".format(msg.id, msg.text), 2)
                 if "!results" in msg.text:
-                    if msg.text == "!results":
+                    if msg.text.strip() == "!results":
                         send_groupme_messages(["Ok {}, getting results from any new tables since the last run.".format(msg.name)], self.bot_id, self.message)
                         self.banker = zeBanker(None, self.donk_group_id, self.output_dir, self.message, None, None, self.bot_id)
                     else:
@@ -83,7 +83,10 @@ if __name__ == "__main__":
     log("Running with config {}".format(args.c))
     reactive_banker = ReactiveBanker(cfg)
 
-    while(True):
-        reactive_banker.run()
+    while True:
+        try:
+            reactive_banker.run()
+        except Exception as e:
+            log("Exception occurred in reactive_banker.run(): {}".format(e))
         time.sleep(1.0)
 
