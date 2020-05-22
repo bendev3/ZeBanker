@@ -30,7 +30,6 @@ class ReactiveBanker:
         self.command = ""
         self.commander = None
 
-
     def get_group(self):
         for group in self.client.groups.list_all():
             if group.id == self.groupme_group_id:
@@ -80,9 +79,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
     cfg = configparser.ConfigParser()
     cfg.read(args.c)
+
+    log("Running with config {}".format(args.c))
     reactive_banker = ReactiveBanker(cfg)
 
     while(True):
         reactive_banker.run()
-        time.sleep(1)
+        time.sleep(1.0)
 
