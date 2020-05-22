@@ -81,24 +81,28 @@ class SiteReader:
                 break  # super hacky but if we do have a download button break the loop and continue
             except Exception as e:
                 log("Site not loaded yet", 2)
-                pass
             time.sleep(.2)
 
         script = "socket.emit('download chip history request', {table_id:" + str(table_id) + "})"
         log("executing script:{}".format(script), 1)
         self.driver.execute_script(script)
 
-        # Now wait for the next file to be downloaded
+        # Now wait for the directory to be created if it doesn't exist
         if not os.path.exists(self.download_dir):
             for i in range(300):
                 if not os.path.exists(self.download_dir):
-                    log("No directory / first file yet")
+                    log("Download directory does not exist", 2)
                     time.sleep(.2)
-        else:
-            for i in range(300):
-                if self.num_files_retrieved == len(os.listdir(self.download_dir)):
-                    log("Next file not loaded yet")
-                    time.sleep(.2)  # wait for file to download
+                else:
+                    break
+
+        # now wait for the file to exist
+        for i in range(300):
+            if self.num_files_retrieved == len(os.listdir(self.download_dir)):
+                log("Next file not loaded yet", 2)
+                time.sleep(.2)  # wait for file to download
+            else:
+                break
 
         self.num_files_retrieved += 1  # another file was retrieved
         log("So far we have retrieved {} files(s)".format(self.num_files_retrieved))
