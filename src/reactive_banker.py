@@ -24,13 +24,20 @@ class ReactiveBanker:
         self.command = ""
         self.commander = None
 
+    def init_run(self):
+        self.banker = None
+        self.new_messages = None
+        self.command = ""
+        self.commander = None
+
+
     def get_group(self):
         for group in self.client.groups.list_all():
             if group.id == self.groupme_group_id:
                 return group
 
     def get_new_messages(self):
-        log("Checking for new messages")
+        log("Checking for new messages", 3)
         message_id_list = [msg.id for msg in self.groupme_group.messages.list()]
         messages_pickle = "groupme_messages_{}.pkl".format(self.groupme_group_id)
         messages_pickle_path = os.path.join(self.output_dir, messages_pickle)
@@ -44,13 +51,13 @@ class ReactiveBanker:
         self.new_messages = set(messages_to_check)
 
     def get_banker(self):
-        log("Parsing messages and potentially constructing zeBanker object")
+        log("Parsing messages and potentially constructing zeBanker object", 3)
         for msg in self.groupme_group.messages.list():
             if msg.id in self.new_messages:
                 log("New message found {}:{}".format(msg.id, msg.text), 2)
                 if "!results" in msg.text:
                     if msg.text == "!results":
-                        send_groupme_messages(["Ok {}, getting results from new tables if there are any.".format(msg.name)], self.bot_id, self.message)
+                        send_groupme_messages(["Ok {}, getting results from any new tables since the last run.".format(msg.name)], self.bot_id, self.message)
                         self.banker = zeBanker(None, self.donk_group_id, self.output_dir, self.message, None, None, self.bot_id)
                     else:
                         num_tables = int(msg.text.replace("!results", ""))
@@ -59,6 +66,7 @@ class ReactiveBanker:
                     break
 
     def run(self):
+        self.init_run()
         self.get_new_messages()
         self.get_banker()
 
@@ -74,5 +82,7 @@ if __name__ == "__main__":
     cfg.read(args.c)
     reactive_banker = ReactiveBanker(cfg)
 
-    reactive_banker.run()
+    while(True):
+        reactive_banker.run()
+        time.sleep(1)
 

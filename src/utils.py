@@ -2,6 +2,7 @@ import os
 import pickle
 import re
 import requests
+import datetime
 
 LOGLEVEL = 2
 API_ENDPOINT = "https://api.groupme.com/v3/bots/post"
@@ -9,7 +10,7 @@ API_ENDPOINT = "https://api.groupme.com/v3/bots/post"
 
 def log(msg, level=0):
     if level <= LOGLEVEL:
-        print(msg)
+        print(datetime.datetime.now(), msg)
 
 
 def val_to_float(val):
