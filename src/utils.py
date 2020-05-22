@@ -26,17 +26,20 @@ def set_pickle(object, output_dir, name):
     pickle.dump(object, open(file_path, "wb"))
 
 
-def send_groupme_messages(messages, bot_id):
-    log("Attempting to send messages...")
+def send_groupme_messages(messages, bot_id, send_message=False):
+    log("Attempting to send message, send_message: {}".format(send_message))
     if len(messages) > 0:
         for message in messages:
-            log(message, 1)
             if message is not None:
-                text = re.sub(' +', ' ', message)  # GroupMe messages don't format well
-                data = {'bot_id': bot_id, 'text': text}
-                # sending post request and saving response as response object
-                r = requests.post(url=API_ENDPOINT, data=data)
-                assert r.ok
+                if send_message:
+                    log(message, 1)
+                    text = re.sub(' +', ' ', message)  # GroupMe messages don't format well
+                    data = {'bot_id': bot_id, 'text': text}
+                    # sending post request and saving response as response object
+                    r = requests.post(url=API_ENDPOINT, data=data)
+                    assert r.ok
+                else:
+                    print(message)
             else:
                 log("Message is None, not sending.")
     else:

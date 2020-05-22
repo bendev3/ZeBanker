@@ -24,11 +24,8 @@ class zeBanker:
             log("files argument not provided, retrieving files from Donkhouse")
             msgs = self.run_external()
 
-        if self.message:
-            send_groupme_messages(msgs, self.bot_id)
-        else:
-            for msg in msgs:
-                print(msg)
+        send_groupme_messages(msgs, self.bot_id, self.message)
+
 
     def run_local(self):
         ps = PokerSplit(self.files)
