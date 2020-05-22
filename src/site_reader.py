@@ -5,7 +5,6 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import os
 from utils import log, get_pickle, set_pickle
-import os
 
 BASE_URL = "https://donkhouse.com/group"
 
@@ -20,6 +19,7 @@ class SiteReader:
         self.cookies = get_pickle(self.output_dir, "cookies.pkl")
         self.driver = None
         self.latest_tables = self.get_latest_tables()
+        self.num_files_retrieved = 0
 
     def init_selenium_driver(self):
         log("Initializing selenium driver with cookies.pkl file", 0)
@@ -32,7 +32,6 @@ class SiteReader:
         self.driver.get('https://donkhouse.com/group/11395/44476')
         for cookie in self.cookies:
             self.driver.add_cookie(cookie)
-        time.sleep(2)
 
     def get_tables(self):
         tables = []
@@ -74,11 +73,32 @@ class SiteReader:
 
     def click_download_csv(self, table_id):
         self.driver.get('https://donkhouse.com/group/{}/{}'.format(self.group_id, table_id))
-        time.sleep(30)  # wait for the browser/site to load before running the script
+
+        # Wait until we have an accessible download button, meaning the site is loaded
+        for i in range(300):
+            try:
+                self.driver.execute_script("game.info_widget.download_button")  # check if we have a download button
+                break  # super hacky but if we do have a download button break the loop and continue
+            except Exception as e:
+                pass
+            time.sleep(.2)
+
         script = "socket.emit('download chip history request', {table_id:" + str(table_id) + "})"
         log("executing script:{}".format(script), 1)
         self.driver.execute_script(script)
-        time.sleep(25)  # keep the browser open long enough to receive the csv from Donkhouse
+
+        # Now wait for the next file to be downloaded
+        if not os.path.exists(self.download_dir):
+            for i in range(300):
+                if not os.path.exists(self.download_dir):
+                    time.sleep(.2)
+        else:
+            for i in range(300):
+                if self.num_files_retrieved == len(os.listdir(self.download_dir)):
+                    time.sleep(.2)  # wait for file to download
+
+        self.num_files_retrieved += 1  # another file was retrieved
+        log("So far we have retrieved {} files(s)".format(self.num_files_retrieved))
 
     def finish(self):
         log("Quitting driver", 0)
@@ -102,7 +122,11 @@ class SiteReader:
             self.finish()
         else:
             log("No tables to retrieve.")
-        assert len(os.listdir(self.download_dir)) == len(self.latest_tables)
+
+        if len(self.latest_tables) > 0:
+            assert os.path.exists(self.download_dir)  # make sure we got all the files we said we got
+            assert len(os.listdir(self.download_dir)) == len(self.latest_tables)
+
         return [self.print_info_retrieved()]
 
 

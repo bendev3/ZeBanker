@@ -3,20 +3,20 @@ from groupy.client import Client
 import argparse
 from utils import get_pickle, set_pickle, send_groupme_messages, log
 import os
-
-token = ""
-groupme_group_id = "59674981"
-#groupme_group_id = "59842005"
-group_id = 11395
+import configparser
 
 script_path = os.path.dirname(os.path.abspath(__file__))
-output_dir = os.path.join(script_path, "../Output")
-
-message = True
 
 class ReactiveBanker:
-    def __init__(self):
-        self.client = Client.from_token(token)
+    def __init__(self, cfg):
+        self.token = cfg["ZeBanker"]["token"]
+        self.groupme_group_id = cfg["ZeBanker"]["groupme_group_id"]
+        self.donk_group_id = cfg["ZeBanker"]["donk_group_id"]
+        self.output_dir = os.path.join(script_path, cfg["ZeBanker"]["output_dir_relative_to_script"])
+        self.message = cfg["ZeBanker"]["message"]
+        self.bot_id = cfg["ZeBanker"]["bot_id"]
+
+        self.client = Client.from_token(self.token)
         self.groupme_group = self.get_group()
         self.banker = None
         self.new_messages = None
@@ -25,21 +25,21 @@ class ReactiveBanker:
 
     def get_group(self):
         for group in self.client.groups.list_all():
-            if group.id == groupme_group_id:
+            if group.id == self.groupme_group_id:
                 return group
 
     def get_new_messages(self):
         log("Checking for new messages")
         message_id_list = [msg.id for msg in self.groupme_group.messages.list()]
-        messages_pickle = "groupme_messages_{}.pkl".format(groupme_group_id)
-        messages_pickle_path = os.path.join(output_dir, messages_pickle)
+        messages_pickle = "groupme_messages_{}.pkl".format(self.groupme_group_id)
+        messages_pickle_path = os.path.join(self.output_dir, messages_pickle)
 
         if os.path.isfile(messages_pickle_path):
-            old_messages = get_pickle(output_dir, messages_pickle)
+            old_messages = get_pickle(self.output_dir, messages_pickle)
             messages_to_check = list(set(message_id_list) - set(old_messages))
         else:
             messages_to_check = message_id_list
-        set_pickle(message_id_list, output_dir, messages_pickle)
+        set_pickle(message_id_list, self.output_dir, messages_pickle)
         self.new_messages = set(messages_to_check)
 
     def get_banker(self):
@@ -49,12 +49,12 @@ class ReactiveBanker:
                 log("New message found {}:{}".format(msg.id, msg.text), 2)
                 if "!results" in msg.text:
                     if msg.text == "!results":
-                        send_groupme_messages(["Ok {}, getting results from new tables if there are any.".format(msg.name)])
-                        self.banker = zeBanker(None, group_id, output_dir, True, None, None)
+                        send_groupme_messages(["Ok {}, getting results from new tables if there are any.".format(msg.name)], self.bot_id)
+                        self.banker = zeBanker(None, self.donk_group_id, self.output_dir, self.message, None, None, self.bot_id)
                     else:
                         num_tables = int(msg.text.replace("!results", ""))
-                        send_groupme_messages(["Ok {}, getting results from the last {} table(s).".format(msg.name, num_tables)])
-                        self.banker = zeBanker(None, group_id, output_dir, True, num_tables, None)
+                        send_groupme_messages(["Ok {}, getting results from the last {} table(s).".format(msg.name, num_tables)], self.bot_id)
+                        self.banker = zeBanker(None, self.donk_group_id, self.output_dir, self.message, num_tables, None, self.bot_id)
                     break
 
     def run(self):
@@ -66,5 +66,11 @@ class ReactiveBanker:
 
 
 if __name__ == "__main__":
-    reactive_banker = ReactiveBanker()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-c', help="Config file")
+    args = parser.parse_args()
+    cfg = configparser.ConfigParser()
+    cfg.read(args.c)
+
+    reactive_banker = ReactiveBanker(cfg)
     reactive_banker.run()

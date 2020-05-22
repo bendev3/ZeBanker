@@ -7,13 +7,14 @@ import argparse
 import time
 
 class zeBanker:
-    def __init__(self, files, group_id, output_dir, message, num_tables, table_ids):
+    def __init__(self, files, group_id, output_dir, message, num_tables, table_ids, bot_id):
         self.files = files
         self.group_id = group_id
         self.output_dir = output_dir
         self.message = message
         self.num_tables = num_tables
         self.table_ids = table_ids
+        self.bot_id = bot_id
 
     def run(self):
         if self.files:
@@ -24,7 +25,7 @@ class zeBanker:
             msgs = self.run_external()
 
         if self.message:
-            send_groupme_messages(msgs)
+            send_groupme_messages(msgs, self.bot_id)
         else:
             for msg in msgs:
                 print(msg)
@@ -57,12 +58,15 @@ if __name__ == "__main__":
     parser.add_argument('-group_id', default=11395, help="Group ID to get files for")
     parser.add_argument('-output_dir', default="../Output", help="Directory to download files to, relative to script")
     parser.add_argument('-message', default=False, action='store_true', help="Send GroupMe message")
+    parser.add_argument('-bot_id', help="GroupMe ID")
+
     """ Optional args to control which tables to get results from or where the table output files already exist """
     parser.add_argument('-table_ids', nargs='*', help="Table ids to run results on")
     parser.add_argument('-num_tables', type=int, help="Number of most recent tables to get results from")
     parser.add_argument('-files', nargs='*', help="Files to pull results from")
 
+
     args = parser.parse_args()
     log(args)
-    banker = zeBanker(args.files, args.group_id, args.output_dir, args.message, args.num_tables, args.table_ids)
+    banker = zeBanker(args.files, args.group_id, args.output_dir, args.message, args.num_tables, args.table_ids, args.bot_id)
     banker.run()
