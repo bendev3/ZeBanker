@@ -45,6 +45,7 @@ class zeBanker:
             poker_split_output = ps.run()
             return site_reader_output + poker_split_output
         else:
+            send_groupme_messages(["No files retrieved"], self.bot_id, self.message)
             log("No files were retrieved. Likely no new games since last run.")
             return []
 
