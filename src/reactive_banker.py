@@ -14,7 +14,7 @@ class ReactiveBanker:
         self.groupme_group_id = cfg["ZeBanker"]["groupme_group_id"]
         self.donk_group_id = cfg["ZeBanker"]["donk_group_id"]
         self.output_dir = os.path.join(script_path, cfg["ZeBanker"]["output_dir_relative_to_script"])
-        self.message = cfg["ZeBanker"]["message"]
+        self.message = cfg["ZeBanker"]["message"] == "True"
         self.bot_id = cfg["ZeBanker"]["bot_id"]
 
         self.client = Client.from_token(self.token)
