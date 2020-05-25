@@ -55,7 +55,12 @@ class SiteReader:
             return [table for table in self.get_tables() if table[0] in self.table_ids]
         if self.num_recent_tables is not None:
             log("Getting results from the most recent {} table(s) for group {}".format(self.num_recent_tables, self.group_id), 0)
-            return self.get_tables()[-1 * self.num_recent_tables:]
+            all_tables = self.get_tables()
+            if self.num_recent_tables > len(all_tables):
+                log("Running on all tables")
+                return all_tables
+            else:
+                return all_tables[-1 * self.num_recent_tables:]
 
         log("Getting results from all tables since last table backup")
         new_table_list = self.get_tables()
