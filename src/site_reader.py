@@ -25,7 +25,8 @@ class SiteReader:
         log("Initializing selenium driver with cookies.pkl file", 0)
         # For linux, start display
         chrome_options = Options()
-        prefs = {"download.default_directory": self.download_dir}
+        prefs = {"download.default_directory": self.download_dir,
+                 "profile.default_content_setting_values.automatic_downloads": 1}
         chrome_options.add_experimental_option("prefs", prefs)
         #chrome_options.add_argument("--headless")
         self.driver = webdriver.Chrome(options=chrome_options)
@@ -76,8 +77,13 @@ class SiteReader:
             set_pickle(new_table_list, self.output_dir, old_table_list_filename)
             return []
 
-    def click_download_csv(self, table_id):
-        self.driver.get('https://donkhouse.com/group/{}/{}'.format(self.group_id, table_id))
+    def open_any_table(self, table_id):
+        #  Open one table which exposes the socket variable.
+        #  Only needs to be done once, we can download results from any table once we're at any table
+        link = 'https://donkhouse.com/group/{}/{}'.format(self.group_id, table_id)
+
+        log("Launching link {}".format(link))
+        self.driver.get(link)
 
         # Wait until we have an accessible download button, meaning the site is loaded
         for i in range(300):
@@ -86,26 +92,27 @@ class SiteReader:
                 break  # super hacky but if we do have a download button break the loop and continue
             except Exception as e:
                 log("Site not loaded yet", 2)
-            time.sleep(.2)
+            time.sleep(0.2)
 
+    def click_download_csv(self, table_id):
         script = "socket.emit('download chip history request', {table_id:" + str(table_id) + "})"
         log("executing script:{}".format(script), 1)
         self.driver.execute_script(script)
 
         # Now wait for the directory to be created if it doesn't exist
         if not os.path.exists(self.download_dir):
-            for i in range(300):
+            for i in range(600):
                 if not os.path.exists(self.download_dir):
                     log("Download directory does not exist", 2)
-                    time.sleep(.2)
+                    time.sleep(0.1)
                 else:
                     break
 
         # now wait for the file to exist
-        for i in range(300):
+        for i in range(600):
             if self.num_files_retrieved == len(os.listdir(self.download_dir)):
                 log("Next file not loaded yet", 2)
-                time.sleep(.2)  # wait for file to download
+                time.sleep(0.1)  # wait for file to download
             else:
                 break
 
@@ -126,6 +133,7 @@ class SiteReader:
         if len(self.latest_tables) > 0:
             try:
                 self.init_selenium_driver()
+                self.open_any_table(self.latest_tables[0][0])  # open the first table
                 for table_id, table_name in self.latest_tables:
                     log("Attempting to download csv for group {}, table {}:{}".format(self.group_id, table_id, table_name), 0)
                     self.click_download_csv(table_id)

@@ -87,6 +87,6 @@ if __name__ == "__main__":
         try:
             reactive_banker.run()
         except Exception as e:
-            log("Exception occurred in reactive_banker.run(): {}".format(e))
+            log("Exception occurred in reactive_banker.run(): {}".format(str(e)))
         time.sleep(1.0)
 
