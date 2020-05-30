@@ -30,7 +30,7 @@ class SiteReader:
         chrome_options.add_experimental_option("prefs", prefs)
         #chrome_options.add_argument("--headless")
         self.driver = webdriver.Chrome(options=chrome_options)
-        self.driver.get('https://donkhouse.com/group/11395/44476')
+        self.driver.get(BASE_URL)
         for cookie in self.cookies:
             self.driver.add_cookie(cookie)
 
