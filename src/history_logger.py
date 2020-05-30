@@ -16,7 +16,7 @@ class HistoryLogger():
     def __init__(self, group_id, output_dir):
         log("Running HistoryLogger with group id {}, output dir {}".format(group_id, output_dir), 1)
         self.group_id = group_id
-        self.output_dir = output_dir
+        self.output_dir = os.path.join(script_path, output_dir)
         self.download_dir = os.path.join(script_path, self.output_dir, "ChatHistories")
         if not os.path.exists(self.download_dir):
             os.mkdir(self.download_dir)
