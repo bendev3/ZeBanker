@@ -118,15 +118,23 @@ class HistoryLogger:
     def get_active_tables(self):
         link = "{}/{}".format(BASE_URL, self.group_id)
         self.driver.get(link)
-        self.driver.execute_script("socket.emit('request sitting count', 0)")
-        time.sleep(1.0)  # wait to get sitting counts
-        group_soup = BeautifulSoup(self.driver.page_source, 'html.parser')
-        tables = group_soup.find_all('div', {'name': 'sitting'})
-        active_tables = []
-        for table in tables:
-            log("Table html line {}".format(table), 3)
-            if int(table.string.split("/")[0]) >= 2:  # 2 players needed to play
-                active_tables.append(table.attrs["id"])
+        script = "socket.emit('request sitting count', 0)"
+        log("Executing script: {}".format(script))
+        self.driver.execute_script(script)
+        time.sleep(0.5)
+        for i in range(20):
+            group_soup = BeautifulSoup(self.driver.page_source, 'html.parser')
+            tables = group_soup.find_all('div', {'name': 'sitting'})
+            active_tables = []
+            try:
+                for table in tables:
+                    log("Table html line {}".format(table), 3)
+                    if int(table.string.split("/")[0]) >= 2:  # 2 players needed to play
+                        active_tables.append(table.attrs["id"])
+                break
+            except Exception as e:
+                log("Exception retrieving table counts trying again in 0.5s: {}".format(str(e)))
+                time.sleep(0.5)
         return active_tables
 
     def run(self):
