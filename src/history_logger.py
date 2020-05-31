@@ -83,7 +83,7 @@ class HistoryLogger():
 
     def update_chat_for_table(self, table_id):
         old_chat_filename = "{}_{}_chat.pkl".format(self.group_id, table_id)
-        old_chat = get_pickle(self.download_dir, old_chat_filename) if os.path.isfile(old_chat_filename) else None
+        old_chat = get_pickle(self.download_dir, old_chat_filename) if os.path.isfile(os.path.join(self.download_dir, old_chat_filename)) else None
         new_chat = self.get_chat_history(table_id)
         if old_chat != new_chat:
             consolodated_chat = self.consolodate_chats(old_chat, new_chat)
