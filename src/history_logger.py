@@ -156,7 +156,7 @@ if __name__ == "__main__":
     while True:
         try:
             logger.run()
-            time.sleep(240)  # sleep four minutes and grab the next chat
+            time.sleep(180)  # sleep three minutes and grab the next chat
         except KeyboardInterrupt:
             log("Keyboard interrupt")
             logger.finish()
