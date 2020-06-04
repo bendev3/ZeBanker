@@ -22,42 +22,52 @@ class HistoryLogger:
             os.mkdir(self.download_dir)
         self.cookies = get_pickle(self.output_dir, "cookies.pkl")
         self.driver = None
-        self.init_selenium_driver()
+        self.driver = self.init_selenium_driver()
+        self.table_drivers = {}
 
     def init_selenium_driver(self):
         log("Initializing selenium driver with cookies.pkl file", 0)
         #chrome_options = Options()
         #chrome_options.add_argument("--headless")
         #self.driver = webdriver.Chrome(options=chrome_options)
-        self.driver = webdriver.Chrome()
-        self.driver.get(BASE_URL)
+        driver = webdriver.Chrome()
+        driver.get(BASE_URL)
         for cookie in self.cookies:
-            self.driver.add_cookie(cookie)
+            driver.add_cookie(cookie)
+        return driver
 
     def open_any_table(self, table_id):
         #  Open one table which exposes the socket variable.
         #  Only needs to be done once, we can download results from any table once we're at any table
-        link = '{}/{}/{}'.format(BASE_URL, self.group_id, table_id)
-
-        log("Launching link {}".format(link))
-        self.driver.get(link)
+        if table_id in self.table_drivers:
+            log("Using existing driver for {}".format(table_id))
+            driver = self.table_drivers[table_id]
+            #driver.refresh() do I need to refresh?
+        else:
+            log("Creating driver for {}".format(table_id))
+            driver = self.init_selenium_driver()
+            link = '{}/{}/{}'.format(BASE_URL, self.group_id, table_id)
+            log("Launching link {}".format(link))
+            driver.get(link)
+            self.table_drivers[table_id] = driver
 
         # Wait until we have an accessible download button, meaning the site is loaded
         for i in range(120):
             try:
-                self.driver.execute_script("game.info_widget.download_button")  # check if we have a download button
+                driver.execute_script("game.info_widget.download_button")  # check if we have a download button
                 break  # super hacky but if we do have a download button break the loop and continue
             except Exception as e:
                 log("Site not loaded yet", 2)
             time.sleep(0.5)
+        return driver
 
     def get_chat_history(self, table_id):
-        self.open_any_table(table_id)
+        driver = self.open_any_table(table_id)
         for i in range(100):
-            table_soup = BeautifulSoup(self.driver.page_source, 'html.parser')
+            table_soup = BeautifulSoup(driver.page_source, 'html.parser')
             chat = table_soup.find('div', id='chat_group')
             chat_text = html2text.html2text(str(chat))
-            if chat_text.strip() != '':
+            if chat_text.strip() != '' and chat_text.strip() != None:
                 log("Chat text exists")
                 break
             else:
@@ -75,6 +85,8 @@ class HistoryLogger:
     def finish(self):
         log("Quitting driver", 0)
         self.driver.quit()
+        for driver in self.table_drivers.values():
+            driver.quit()
 
     def consolodate_chats(self, old_chat, new_chat):
         if not new_chat and not old_chat:
@@ -85,13 +97,11 @@ class HistoryLogger:
             return old_chat
         for old_msg_index, old_msg in enumerate(old_chat):
             if old_msg == new_chat[0]:
-                offset = 0
                 for new_msg_index, new_msg in enumerate(new_chat):
-                    if old_chat[old_msg_index + offset] == new_msg:
-                        if old_msg_index + offset == len(old_chat) - 1:
+                    if old_chat[old_msg_index + new_msg_index] == new_msg:
+                        if old_msg_index + new_msg_index == len(old_chat) - 1:
                             log("Found overlap with old index {}/{} new index {}/{}".format(old_msg_index, len(old_chat), new_msg_index, len(new_chat)))
                             return old_chat + new_chat[new_msg_index + 1:]
-                        offset += 1
                     else:
                         break
 
@@ -129,7 +139,7 @@ class HistoryLogger:
             try:
                 for table in tables:
                     log("Table html line {}".format(table), 3)
-                    if int(table.string.split("/")[0]) >= 2:  # 2 players needed to play
+                    if int(table.string.split("/")[0]) >= 2:
                         active_tables.append(table.attrs["id"])
                 break
             except Exception as e:
@@ -156,7 +166,7 @@ if __name__ == "__main__":
     while True:
         try:
             logger.run()
-            time.sleep(180)  # sleep three minutes and grab the next chat
+            time.sleep(120)  # sleep two minutes and grab the next chat
         except KeyboardInterrupt:
             log("Keyboard interrupt")
             logger.finish()
