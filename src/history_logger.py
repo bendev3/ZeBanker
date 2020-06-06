@@ -27,10 +27,9 @@ class HistoryLogger:
 
     def init_selenium_driver(self):
         log("Initializing selenium driver with cookies.pkl file", 0)
-        #chrome_options = Options()
-        #chrome_options.add_argument("--headless")
-        #self.driver = webdriver.Chrome(options=chrome_options)
-        driver = webdriver.Chrome()
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")
+        driver = webdriver.Chrome(options=chrome_options)
         driver.get(BASE_URL)
         for cookie in self.cookies:
             driver.add_cookie(cookie)
@@ -135,7 +134,7 @@ class HistoryLogger:
         log("Executing script: {}".format(script))
         self.driver.execute_script(script)
         time.sleep(0.5)
-        for i in range(20):
+        for i in range(30):
             group_soup = BeautifulSoup(self.driver.page_source, 'html.parser')
             tables = group_soup.find_all('div', {'name': 'sitting'})
             active_tables = []
@@ -146,14 +145,18 @@ class HistoryLogger:
                         active_tables.append(table.attrs["id"])
                 break
             except Exception as e:
-                log("Exception retrieving table counts trying again in 0.5s: {}".format(str(e)))
-                time.sleep(0.5)
+                log("Exception retrieving table counts trying again in 1.0s: {}".format(str(e)))
+                time.sleep(1.0)
         return active_tables
 
     def run(self):
+        count = 0
         for table_id in self.get_active_tables():
             log("{} is active, updating chat history".format(table_id))
             self.update_chat_for_table(table_id)
+            count += 1
+        if count == 0:
+            log("No active tables")
 
 
 if __name__ == "__main__":

@@ -28,7 +28,7 @@ class SiteReader:
         prefs = {"download.default_directory": self.download_dir,
                  "profile.default_content_setting_values.automatic_downloads": 1}
         chrome_options.add_experimental_option("prefs", prefs)
-        #chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--headless")
         self.driver = webdriver.Chrome(options=chrome_options)
         self.driver.get(BASE_URL)
         for cookie in self.cookies:
