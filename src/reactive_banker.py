@@ -1,7 +1,7 @@
 from ze_banker_groupme import zeBanker
 from groupy.client import Client
 import argparse
-from utils import get_pickle, set_pickle, send_groupme_messages, log
+from utils import get_pickle, set_pickle, send_groupme_messages, log, is_int
 import os
 import configparser
 import time
@@ -58,19 +58,23 @@ class ReactiveBanker:
                     if msg.text.strip() == "!results":
                         send_groupme_messages(["Ok {}, getting results from any new tables since the last run.".format(msg.name)], self.bot_id, self.message)
                         self.banker = zeBanker(None, self.donk_group_id, self.output_dir, self.message, None, None, self.bot_id)
-                    else:
+                    elif is_int(msg.text.replace("!results", "")):
                         num_tables = int(msg.text.replace("!results", ""))
                         send_groupme_messages(["Ok {}, getting results from the last {} table(s).".format(msg.name, num_tables)], self.bot_id, self.message)
                         self.banker = zeBanker(None, self.donk_group_id, self.output_dir, self.message, num_tables, None, self.bot_id)
                     break
 
     def run(self):
-        self.init_run()
-        self.get_new_messages()
-        self.get_banker()
+        try:
+            self.init_run()
+            self.get_new_messages()
+            self.get_banker()
 
-        if self.banker:
-            self.banker.run()
+            if self.banker:
+                self.banker.run()
+        except Exception as e:
+            send_groupme_messages(["Error: {}".format(str(e))], self.bot_id, self.message)
+            log("Exception occurred in reactive_banker.run(): {}".format(str(e)))
 
 
 if __name__ == "__main__":
@@ -84,9 +88,6 @@ if __name__ == "__main__":
     reactive_banker = ReactiveBanker(cfg)
 
     while True:
-        try:
-            reactive_banker.run()
-        except Exception as e:
-            log("Exception occurred in reactive_banker.run(): {}".format(str(e)))
+        reactive_banker.run()
         time.sleep(1.0)
 

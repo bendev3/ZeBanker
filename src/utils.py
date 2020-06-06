@@ -45,3 +45,11 @@ def send_groupme_messages(messages, bot_id, send_message=False):
                 log("Message is None, not sending.")
     else:
         log("No message to send")
+
+
+def is_int(val):
+    try:
+        num = int(val)
+    except ValueError:
+        return False
+    return True

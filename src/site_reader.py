@@ -110,7 +110,7 @@ class SiteReader:
 
         # now wait for the file to exist
         for i in range(600):
-            if self.num_files_retrieved == len(os.listdir(self.download_dir)):
+            if self.num_files_retrieved >= len(os.listdir(self.download_dir)):
                 log("Next file not loaded yet", 2)
                 time.sleep(0.1)  # wait for file to download
             else:
@@ -144,9 +144,10 @@ class SiteReader:
             log("No tables to retrieve.")
 
         if len(self.latest_tables) > 0:
-            assert os.path.exists(self.download_dir)  # make sure we got all the files we said we got
-            log("Checking that num files {} equals num tables {}".format(len(os.listdir(self.download_dir)), len(self.latest_tables)))
-            assert len(os.listdir(self.download_dir)) == len(self.latest_tables)
+            log("Asserting {} files exist in {}".format(self.num_files_retrieved, self.download_dir))
+            assert os.path.exists(self.download_dir), "Asserting download directory {} exists".format(self.download_dir)
+            assert len(os.listdir(self.download_dir)) == len(self.latest_tables), \
+                "Checking that num files {} equals num tables {}".format(len(os.listdir(self.download_dir)), len(self.latest_tables))
 
         return [self.print_info_retrieved()]
 

@@ -143,11 +143,14 @@ class PokerSplit:
                 player_nets_dict_from_transactions[from_name] = 0
             if to_name not in player_nets_dict_from_transactions:
                 player_nets_dict_from_transactions[to_name] = 0
-            player_nets_dict_from_transactions[from_name] -= amount
-            player_nets_dict_from_transactions[to_name] += amount
+            player_nets_dict_from_transactions[from_name] = round(player_nets_dict_from_transactions[from_name] - amount, 10)
+            player_nets_dict_from_transactions[to_name] = round(player_nets_dict_from_transactions[to_name] + amount, 10)
 
         for player in player_nets_dict_from_transactions:
-            assert player_nets_dict_from_transactions[player] == self.player_nets_dict[player]
+            transaction_net = round(player_nets_dict_from_transactions[player], 10)
+            csv_net = round(self.player_nets_dict[player], 10)
+            assert transaction_net == csv_net, \
+                "{}, transaction net == csv net, {} == {}".format(player, transaction_net, csv_net)
 
     def _check_transaction_sum(self):
         log("Testing to ensure the sum of transactions amounts is half of the sum of the absolute values of the nets", 1)
