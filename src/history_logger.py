@@ -141,7 +141,7 @@ class HistoryLogger:
             try:
                 for table in tables:
                     log("Table html line {}".format(table), 3)
-                    if int(table.string.split("/")[0]) >= 2:
+                    if int(table.string.split("/")[0]) >= 1:
                         active_tables.append(table.attrs["id"])
                 break
             except Exception as e:
@@ -150,12 +150,15 @@ class HistoryLogger:
         return active_tables
 
     def run(self):
-        count = 0
-        for table_id in self.get_active_tables():
+        active_tables = self.get_active_tables()
+        for table_id in active_tables:
             log("{} is active, updating chat history".format(table_id))
             self.update_chat_for_table(table_id)
-            count += 1
-        if count == 0:
+        for table_id in set(self.table_drivers.keys()) - set(active_tables):
+            log("{} is no longer active, closing driver".format(table_id))
+            self.table_drivers[table_id].quit()
+            del self.table_drivers[table_id]
+        if len(active_tables) == 0:
             log("No active tables")
 
 
