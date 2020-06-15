@@ -72,8 +72,10 @@ class ReactiveBanker:
 
             if self.banker:
                 self.banker.run()
-        except Exception as e:
+        except AssertionError as e:
             send_groupme_messages(["Error: {}".format(str(e))], self.bot_id, self.message)
+            log("Exception occurred in reactive_banker.run(): {}".format(str(e)))
+        except Exception as e:
             log("Exception occurred in reactive_banker.run(): {}".format(str(e)))
 
 
