@@ -83,9 +83,9 @@ class HistoryLogger:
         if not new_chat:
             return old_chat
         for old_msg_index, old_msg in enumerate(old_chat):
-            if old_msg == new_chat[0]:
+            if old_msg.strip() == new_chat[0].strip():
                 for new_msg_index, new_msg in enumerate(new_chat):
-                    if old_chat[old_msg_index + new_msg_index] == new_msg:
+                    if old_chat[old_msg_index + new_msg_index].strip() == new_msg.strip():
                         if old_msg_index + new_msg_index == len(old_chat) - 1:
                             log("Found overlap with old index{}/len{} new index{}/len{}".format(old_msg_index, len(old_chat), new_msg_index, len(new_chat)))
                             return old_chat + new_chat[new_msg_index + 1:]
