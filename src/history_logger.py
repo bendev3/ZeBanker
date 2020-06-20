@@ -159,7 +159,7 @@ if __name__ == "__main__":
     while True:
         try:
             logger.run()
-            time.sleep(10)  # sleep 10 seconds and get any new chats
+            time.sleep(30)  # sleep 30 seconds and get any new chats
         except KeyboardInterrupt:
             log("Keyboard interrupt")
             logger.finish()
