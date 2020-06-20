@@ -52,7 +52,7 @@ class HistoryLogger:
         script = "update_chat_mode(\"hand histories only\")"
         log("Executing script {}".format(script))
         self.driver.execute_script(script)
-        for i in range(20):
+        for i in range(10):
             table_soup = BeautifulSoup(self.driver.page_source, 'html.parser')
             chat = table_soup.find('div', id='chat_group')
             chat_text = html2text.html2text(str(chat))
