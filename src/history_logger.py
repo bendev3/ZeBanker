@@ -70,8 +70,10 @@ class HistoryLogger:
             self.driver.execute_script(script)
             return self.get_chat_history(table_id)  # try again, hope for no infinite recursion
         '''
-        return [chat for chat in chat_text.splitlines() if "came through" not in chat and chat != '']
-
+        new_chat = [chat for chat in chat_text.splitlines() if "came through" not in chat and chat != '']
+        if len(new_chat) > 10:
+            return new_chat[:-10]
+        return new_chat
     def finish(self):
         log("Quitting driver", 0)
         self.driver.quit()
