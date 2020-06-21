@@ -23,6 +23,7 @@ class HistoryLogger:
         self.cookies = get_pickle(self.output_dir, "cookies.pkl")
         self.driver = None
         self.driver = self.init_selenium_driver()
+        self.last_new_chat_lengths = {}
 
     def init_selenium_driver(self):
         log("Initializing selenium driver with cookies.pkl file", 0)
@@ -96,6 +97,21 @@ class HistoryLogger:
         old_chat_filename = "{}_{}_chat.pkl".format(self.group_id, table_id)
         old_chat = get_pickle(self.download_dir, old_chat_filename) if os.path.isfile(os.path.join(self.download_dir, old_chat_filename)) else None
         new_chat = self.get_chat_history(table_id)
+        len_new_chat = len(new_chat)
+        if table_id in self.last_new_chat_lengths:
+            last_new_chat_length = self.last_new_chat_lengths[table_id]
+        else:
+            last_new_chat_length = None
+        if last_new_chat_length is not None and len_new_chat >= last_new_chat_length * 1.5:
+            new_chat = []
+            log("New chat length {} exceeded 1.5x last new chat length {}. Ignoring.".format(
+                len_new_chat, last_new_chat_length
+            ))
+        else:
+            log("New chat length {} does not exceed 1.5x last new chat length {}. Using new chat.".format(
+                len_new_chat, last_new_chat_length
+            ))
+            self.last_new_chat_lengths[table_id] = len(new_chat)
         log("Old chat length for table {}: {}".format(table_id, self.log_chat(old_chat)))
         log("New chat length for table {}: {}".format(table_id, self.log_chat(new_chat)))
         if old_chat != new_chat:
@@ -105,10 +121,10 @@ class HistoryLogger:
                     table_id, self.log_chat(consolodated_chat), consolodated_chat[0], consolodated_chat[len(consolodated_chat) - 1]))
                 set_pickle(consolodated_chat, self.download_dir, old_chat_filename)
             else:
+                log("Consolodated chat for table {} is None or len 0. Not saving.".format(table_id))
                 log("Old:{}\n".format(old_chat))
                 log("New:{}\n".format(new_chat))
                 log("Consolodated:\n{}".format(consolodated_chat))
-                log("Consolodated chat for table {} is None or len 0. Not saving.".format(table_id))
         else:
             log("Chat has not changed for table {}".format(table_id))
 
@@ -117,6 +133,7 @@ class HistoryLogger:
 
     def get_active_tables(self):
         link = "{}/{}".format(BASE_URL, self.group_id)
+        log("Launching link {}".format(link))
         self.driver.get(link)
         script = "socket.emit('request sitting count', 0)"
         log("Executing script: {}".format(script))
