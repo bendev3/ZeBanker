@@ -106,11 +106,11 @@ class HistoryLogger:
             last_new_chat_length = None
         if last_new_chat_length is not None and (len_new_chat > 400 or (len_new_chat >= last_new_chat_length * 1.7 and last_new_chat_length > 110)):
             new_chat = []
-            log("New chat length {} exceeds 1.5x the last new chat length {} or max 400. Ignoring.".format(
+            log("New chat length {} exceeds 1.7x the last new chat length {} or max 400. Ignoring.".format(
                 len_new_chat, last_new_chat_length
             ))
         else:
-            log("New chat length {} does not exceed 1.5x last new chat length {} or max 400. Using new chat.".format(
+            log("New chat length {} does not exceed 1.7x last new chat length {} or max 400. Using new chat.".format(
                 len_new_chat, last_new_chat_length
             ))
             self.last_new_chat_lengths[table_id] = len(new_chat)
@@ -183,7 +183,7 @@ if __name__ == "__main__":
     while True:
         try:
             logger.run()
-            time.sleep(90)  # sleep 90 seconds and get any new chats
+            time.sleep(120)  # sleep 120 seconds and get any new chats
         except KeyboardInterrupt:
             log("Keyboard interrupt")
             logger.finish()
