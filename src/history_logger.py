@@ -104,7 +104,7 @@ class HistoryLogger:
             last_new_chat_length = self.last_new_chat_lengths[table_id]
         else:
             last_new_chat_length = None
-        if last_new_chat_length is not None and (len_new_chat > 400 or (len_new_chat >= last_new_chat_length * 1.5 and last_new_chat_length > 100)):
+        if last_new_chat_length is not None and (len_new_chat > 400 or (len_new_chat >= last_new_chat_length * 1.7 and last_new_chat_length > 110)):
             new_chat = []
             log("New chat length {} exceeds 1.5x the last new chat length {} or max 400. Ignoring.".format(
                 len_new_chat, last_new_chat_length
