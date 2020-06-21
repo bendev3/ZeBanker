@@ -127,6 +127,11 @@ class HistoryLogger:
                 log("Old:{}\n".format(old_chat))
                 log("New:{}\n".format(new_chat))
                 log("Consolodated:\n{}".format(consolodated_chat))
+            if consolodated_chat is None or len(consolodated_chat) == 0 or old_chat == consolodated_chat:
+                # Situations where we fail, but want to run again, jus run again rather than waiting
+                log("Re running self.update_chat_for_table in 5 seconds")
+                time.sleep(5)
+                self.update_chat_for_table(table_id)
         else:
             log("Chat has not changed for table {}".format(table_id))
 
