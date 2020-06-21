@@ -104,7 +104,7 @@ class HistoryLogger:
             last_new_chat_length = self.last_new_chat_lengths[table_id]
         else:
             last_new_chat_length = None
-        if last_new_chat_length is not None and (len_new_chat > 400 or len_new_chat >= last_new_chat_length * 1.5):
+        if last_new_chat_length is not None and (len_new_chat > 400 or (len_new_chat >= last_new_chat_length * 1.5 and last_new_chat_length > 100)):
             new_chat = []
             log("New chat length {} exceeds 1.5x the last new chat length {} or max 400. Ignoring.".format(
                 len_new_chat, last_new_chat_length
@@ -128,8 +128,8 @@ class HistoryLogger:
                 log("New:{}\n".format(new_chat))
                 log("Consolodated:\n{}".format(consolodated_chat))
             if consolodated_chat is None or len(consolodated_chat) == 0 or old_chat == consolodated_chat:
-                # Situations where we fail, but want to run again, jus run again rather than waiting
-                log("Re running self.update_chat_for_table in 5 seconds")
+                # Situations where we fail, but want to run again, just run again rather than waiting
+                log("Re running self.update_chat_for_table for table {} in 5 seconds".format(table_id))
                 time.sleep(5)
                 self.update_chat_for_table(table_id)
         else:
@@ -183,7 +183,7 @@ if __name__ == "__main__":
     while True:
         try:
             logger.run()
-            time.sleep(90)  # sleep 90 seconds and get any new chats
+            time.sleep(10)  # sleep 90 seconds and get any new chats
         except KeyboardInterrupt:
             log("Keyboard interrupt")
             logger.finish()
