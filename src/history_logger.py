@@ -7,6 +7,7 @@ import os
 from utils import log, get_pickle, set_pickle
 import argparse
 import html2text
+from datetime import datetime
 
 BASE_URL = "https://donkhouse.com/group"
 script_path = os.path.dirname(os.path.abspath(__file__))
@@ -162,6 +163,7 @@ class HistoryLogger:
         return active_tables
 
     def run(self):
+        log("Starting run")
         active_tables = self.get_active_tables()
         for table_id in active_tables:
             log("{} is active, updating chat history".format(table_id))
@@ -182,8 +184,17 @@ if __name__ == "__main__":
     logger = HistoryLogger(args.group_id, args.output_dir)
     while True:
         try:
+            start = datetime.now()
             logger.run()
-            time.sleep(120)  # sleep 120 seconds and get any new chats
+            finish = datetime.now()
+            elapsed = (finish - start).total_seconds()
+            time_to_sleep = 150 - elapsed
+            log("elapsed: {} seconds".format(elapsed))
+            if time_to_sleep > 0:
+                log("Sleeping {} seconds".format(time_to_sleep))
+                time.sleep(time_to_sleep)
+            else:
+                log("Not sleeping")
         except KeyboardInterrupt:
             log("Keyboard interrupt")
             logger.finish()
