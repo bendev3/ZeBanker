@@ -25,6 +25,7 @@ class HistoryLogger:
         self.driver = None
         self.driver = self.init_selenium_driver()
         self.last_new_chat_lengths = {}
+        self.last_active_tables = None
 
     def init_selenium_driver(self):
         log("Initializing selenium driver with cookies.pkl file", 0)
@@ -49,7 +50,7 @@ class HistoryLogger:
                 log("Site not loaded yet", 2)
             time.sleep(0.5)
 
-    def get_chat_history(self, table_id):
+    def get_chat_history(self, table_id, ignore_last):
         self.open_any_table(table_id)
         script = "update_chat_mode(\"hand histories only\")"
         log("Executing script {}".format(script))
@@ -72,9 +73,10 @@ class HistoryLogger:
             return self.get_chat_history(table_id)  # try again, hope for no infinite recursion
         '''
         new_chat = [chat for chat in chat_text.splitlines() if "came through" not in chat and chat != '']
-        if len(new_chat) > 15:
-            return new_chat[:-15]
+        if len(new_chat) > ignore_last:
+            return new_chat[:len(new_chat) - ignore_last]
         return new_chat
+
     def finish(self):
         log("Quitting driver", 0)
         self.driver.quit()
@@ -96,10 +98,10 @@ class HistoryLogger:
                     else:
                         break
 
-    def update_chat_for_table(self, table_id):
+    def update_chat_for_table(self, table_id, ignore_last):
         old_chat_filename = "{}_{}_chat.pkl".format(self.group_id, table_id)
         old_chat = get_pickle(self.download_dir, old_chat_filename) if os.path.isfile(os.path.join(self.download_dir, old_chat_filename)) else None
-        new_chat = self.get_chat_history(table_id)
+        new_chat = self.get_chat_history(table_id, ignore_last)
         len_new_chat = len(new_chat)
         if table_id in self.last_new_chat_lengths:
             last_new_chat_length = self.last_new_chat_lengths[table_id]
@@ -128,11 +130,11 @@ class HistoryLogger:
                 log("Old:{}\n".format(old_chat))
                 log("New:{}\n".format(new_chat))
                 log("Consolodated:\n{}".format(consolodated_chat))
-            if consolodated_chat is None or len(consolodated_chat) == 0 or old_chat == consolodated_chat:
+            if consolodated_chat is None or len(consolodated_chat) == 0 or not new_chat:
                 # Situations where we fail, but want to run again, just run again rather than waiting
                 log("Re running self.update_chat_for_table for table {} in 5 seconds".format(table_id))
                 time.sleep(5)
-                self.update_chat_for_table(table_id)
+                self.update_chat_for_table(table_id, ignore_last)
         else:
             log("Chat has not changed for table {}".format(table_id))
 
@@ -167,7 +169,13 @@ class HistoryLogger:
         active_tables = self.get_active_tables()
         for table_id in active_tables:
             log("{} is active, updating chat history".format(table_id))
-            self.update_chat_for_table(table_id)
+            self.update_chat_for_table(table_id, 15)
+        if self.last_active_tables:
+            recently_completed_tables = list(set(self.last_active_tables) - set(active_tables))
+            for table_id in recently_completed_tables:
+                log("Table {} is no longer active. Getting last set of messages.".format(table_id))
+                self.update_chat_for_table(table_id, 0)
+        self.last_active_tables = active_tables
         if len(active_tables) == 0:
             log("No active tables")
 
@@ -177,18 +185,20 @@ if __name__ == "__main__":
     # Files need to be downloaded from Donkhouse
     parser.add_argument('-group_id', default=11395, help="Group ID")
     parser.add_argument('-output_dir', default="../Output", help="Directory to output chat history to")
+    parser.add_argument('-poll_interval', default="150", help="Time to wait between runs")
 
     args = parser.parse_args()
     log(args)
 
-    logger = HistoryLogger(args.group_id, args.output_dir)
     while True:
         try:
+            logger = HistoryLogger(args.group_id, args.output_dir)
             start = datetime.now()
             logger.run()
+            logger.finish()
             finish = datetime.now()
             elapsed = (finish - start).total_seconds()
-            time_to_sleep = 150 - elapsed
+            time_to_sleep = float(args.poll_interval) - elapsed
             log("elapsed: {} seconds".format(elapsed))
             if time_to_sleep > 0:
                 log("Sleeping {} seconds".format(time_to_sleep))
