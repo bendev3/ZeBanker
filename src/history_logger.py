@@ -23,7 +23,7 @@ class HistoryLogger:
             os.mkdir(self.download_dir)
         self.cookies = get_pickle(self.output_dir, "cookies.pkl")
         self.driver = None
-        self.driver = self.init_selenium_driver()
+        self.driver = None
         self.last_new_chat_lengths = {}
         self.last_active_tables = None
 
@@ -31,24 +31,23 @@ class HistoryLogger:
         log("Initializing selenium driver with cookies.pkl file", 0)
         chrome_options = Options()
         #chrome_options.add_argument("--headless")
-        driver = webdriver.Chrome(options=chrome_options)
-        driver.get(BASE_URL)
+        self.driver = webdriver.Chrome(options=chrome_options)
+        self.driver.get(BASE_URL)
         for cookie in self.cookies:
-            driver.add_cookie(cookie)
-        return driver
+            self.driver.add_cookie(cookie)
 
     def open_any_table(self, table_id):
         link = '{}/{}/{}'.format(BASE_URL, self.group_id, table_id)
         log("Launching link {}".format(link))
         self.driver.get(link)
         # Wait until we have an accessible download button, meaning the site is loaded
-        for i in range(120):
+        for i in range(60):
             try:
                 self.driver.execute_script("game.info_widget.download_button")  # check if we have a download button
                 break  # super hacky but if we do have a download button break the loop and continue
             except Exception as e:
                 log("Site not loaded yet", 2)
-            time.sleep(0.5)
+            time.sleep(1.0)
 
     def get_chat_history(self, table_id, ignore_last):
         self.open_any_table(table_id)
@@ -136,8 +135,8 @@ class HistoryLogger:
                 log("Consolodated:\n{}".format(consolodated_chat))
             if consolodated_chat is None or len(consolodated_chat) == 0 or not new_chat:
                 # Situations where we fail, but want to run again, just run again rather than waiting
-                log("Re running self.update_chat_for_table for table {} in 5 seconds".format(table_id))
-                time.sleep(5)
+                log("Re running self.update_chat_for_table for table {} in 2 seconds".format(table_id))
+                time.sleep(2)
                 self.update_chat_for_table(table_id, ignore_last)
         else:
             log("Chat has not changed for table {}".format(table_id))
@@ -193,10 +192,11 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     log(args)
+    logger = HistoryLogger(args.group_id, args.output_dir)
 
     while True:
         try:
-            logger = HistoryLogger(args.group_id, args.output_dir)
+            logger.init_selenium_driver()
             start = datetime.now()
             logger.run()
             logger.finish()
