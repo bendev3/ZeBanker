@@ -130,7 +130,7 @@ class HistoryLogger:
                 log("Old:{}\n".format(old_chat))
                 log("New:{}\n".format(new_chat))
                 if len(old_chat) > 20:
-                    log("End of old:{}\n".format(old_chat[:-20]))
+                    log("End of old:{}\n".format(old_chat[-20:]))
                 if len(new_chat) > 20:
                     log("Beginning of new:{}\n".format(new_chat[:20]))
                 log("Consolodated:\n{}".format(consolodated_chat))
