@@ -215,4 +215,5 @@ if __name__ == "__main__":
             break
         except Exception as e:
             log("Different Exception: {}".format(str(e)))
+            logger.finish()
             # continue?
