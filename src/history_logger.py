@@ -129,6 +129,10 @@ class HistoryLogger:
                 log("Consolodated chat for table {} is None or len 0. Not saving.".format(table_id))
                 log("Old:{}\n".format(old_chat))
                 log("New:{}\n".format(new_chat))
+                if len(old_chat) > 20:
+                    log("End of old:{}\n".format(old_chat[:-20]))
+                if len(new_chat) > 20:
+                    log("Beginning of new:{}\n".format(new_chat[:20]))
                 log("Consolodated:\n{}".format(consolodated_chat))
             if consolodated_chat is None or len(consolodated_chat) == 0 or not new_chat:
                 # Situations where we fail, but want to run again, just run again rather than waiting
