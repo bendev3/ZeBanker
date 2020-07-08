@@ -26,6 +26,9 @@ class HistoryLogger:
         self.driver = None
         self.last_new_chat_lengths = {}
         self.last_active_tables = None
+        self.active_tables = None
+        self.all_tables = None
+        self.last_all_tables = None
 
     def init_selenium_driver(self):
         log("Initializing selenium driver with cookies.pkl file", 0)
@@ -155,31 +158,38 @@ class HistoryLogger:
         for i in range(30):
             group_soup = BeautifulSoup(self.driver.page_source, 'html.parser')
             tables = group_soup.find_all('div', {'name': 'sitting'})
-            active_tables = []
+            self.active_tables = []
+            self.all_tables = []
             try:
                 for table in tables:
                     log("Table html line {}".format(table), 3)
                     if int(table.string.split("/")[0]) >= 1:
-                        active_tables.append(table.attrs["id"])
+                        self.active_tables.append(table.attrs["id"])
+                    self.all_tables.append(table.attrs["id"])
                 break
             except Exception as e:
                 log("Exception retrieving table counts trying again in 1.0s: {}".format(str(e)))
                 time.sleep(1.0)
-        return active_tables
 
     def run(self):
         log("Starting run")
-        active_tables = self.get_active_tables()
-        for table_id in active_tables:
+        self.get_active_tables()
+        for table_id in self.active_tables:
             log("{} is active, updating chat history".format(table_id))
             self.update_chat_for_table(table_id, 15)
         if self.last_active_tables:
-            recently_completed_tables = list(set(self.last_active_tables) - set(active_tables))
+            recently_completed_tables = list(set(self.last_active_tables) - set(self.active_tables))
+            recently_deleted_tables = list(set(self.last_all_tables) - set(self.all_tables))
+            print(self.all_tables, "\n", self.last_all_tables, "\n", recently_deleted_tables)
             for table_id in recently_completed_tables:
-                log("Table {} is no longer active. Getting last set of messages.".format(table_id))
-                self.update_chat_for_table(table_id, 0)
-        self.last_active_tables = active_tables
-        if len(active_tables) == 0:
+                if table_id in recently_deleted_tables:
+                    log("Table {} is no longer active but was recently deleted.".format(table_id))
+                else:
+                    log("Table {} is no longer active. Getting last set of messages.".format(table_id))
+                    self.update_chat_for_table(table_id, 0)
+        self.last_active_tables = self.active_tables
+        self.last_all_tables = self.all_tables
+        if len(self.active_tables) == 0:
             log("No active tables")
 
 
