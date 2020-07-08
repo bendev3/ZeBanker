@@ -180,7 +180,6 @@ class HistoryLogger:
         if self.last_active_tables:
             recently_completed_tables = list(set(self.last_active_tables) - set(self.active_tables))
             recently_deleted_tables = list(set(self.last_all_tables) - set(self.all_tables))
-            print(self.all_tables, "\n", self.last_all_tables, "\n", recently_deleted_tables)
             for table_id in recently_completed_tables:
                 if table_id in recently_deleted_tables:
                     log("Table {} is no longer active but was recently deleted.".format(table_id))
