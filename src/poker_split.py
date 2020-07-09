@@ -50,12 +50,13 @@ class PokerSplit:
         return s
 
     def print_contact_info(self):
-        s = "*** Venmo Info ***\n"
-        for player, venmo in self.players_info_dict.items():
-            a = player + ": "
-            if venmo:
-                s += "{:<14}{}\n".format(a, venmo)
-        return s
+        if len(self.players_info_dict) > 0:
+            s = "*** Venmo Info ***\n"
+            for player, venmo in self.players_info_dict.items():
+                a = player + ": "
+                if venmo:
+                    s += "{:<14}{}\n".format(a, venmo)
+            return s
 
     def determine_payouts(self):
         log("Determining payouts from previously read in csv(s)")
