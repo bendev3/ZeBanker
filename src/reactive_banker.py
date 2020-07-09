@@ -5,6 +5,7 @@ from utils import get_pickle, set_pickle, send_groupme_messages, log, is_int
 import os
 import configparser
 import time
+from get_nets import getNets
 
 script_path = os.path.dirname(os.path.abspath(__file__))
 
@@ -62,6 +63,14 @@ class ReactiveBanker:
                         num_tables = int(msg.text.replace("!results", ""))
                         send_groupme_messages(["Ok {}, getting results from the last {} table(s).".format(msg.name, num_tables)], self.bot_id, self.message)
                         self.banker = zeBanker(None, self.donk_group_id, self.output_dir, self.message, num_tables, None, self.bot_id)
+                    elif ":" in msg.text:
+                        tables = msg.text.split(":")[1].split(",")
+                        file_names = []
+                        for table in tables:
+                            file_name = "{}_{}_chat.pkl".format(self.donk_group_id, table)
+                            file_names.append(os.path.abspath(os.path.join(script_path, "../Output/ChatHistories", file_name)))
+                        net_getter = getNets(file_names)
+                        self.banker = zeBanker(None, self.donk_group_id, self.output_dir, self.message, None, None, self.bot_id, net_getter.run())
                     break
 
     def run(self):
@@ -72,11 +81,12 @@ class ReactiveBanker:
 
             if self.banker:
                 self.banker.run()
+
         except AssertionError as e:
             send_groupme_messages(["Error: {}".format(str(e))], self.bot_id, self.message)
             log("Exception occurred in reactive_banker.run(): {}".format(str(e)))
-        except Exception as e:
-            log("Exception occurred in reactive_banker.run(): {}".format(str(e)))
+        #except Exception as e:
+        #    log("Exception occurred in reactive_banker.run(): {}".format(str(e)))
 
 
 if __name__ == "__main__":

@@ -9,14 +9,18 @@ from utils import log, val_to_float
 WIN_LOSER_PAIRS = []
 
 class PokerSplit:
-    def __init__(self, files):
+    def __init__(self, files, nets=None):
         self.transactions = []
+        self.nets = nets
         self.player_nets_dict = {}
         self.players_info_dict = {}
         self.files = files
 
     def run(self):
-        self.get_player_info_from_csv(self.files)
+        if self.nets:
+            self.player_nets_dict = self.nets
+        else:
+            self.get_player_info_from_csv(self.files)
         self.determine_payouts()
         self.test()
         return [self.print_nets(), self.print_payouts(), self.print_contact_info()]

@@ -7,7 +7,7 @@ import argparse
 import time
 
 class zeBanker:
-    def __init__(self, files, group_id, output_dir, message, num_tables, table_ids, bot_id):
+    def __init__(self, files, group_id, output_dir, message, num_tables, table_ids, bot_id, nets = None):
         self.files = files
         self.group_id = group_id
         self.output_dir = output_dir
@@ -15,11 +15,14 @@ class zeBanker:
         self.num_tables = num_tables
         self.table_ids = table_ids
         self.bot_id = bot_id
+        self.nets = nets
 
     def run(self):
         if self.files:
             log("files argument provided, running on existing files")
             msgs = self.run_local()
+        elif self.nets:
+            msgs = self.run_with_nets()
         else:
             log("files argument not provided, retrieving files from Donkhouse")
             msgs = self.run_external()
@@ -29,6 +32,10 @@ class zeBanker:
 
     def run_local(self):
         ps = PokerSplit(self.files)
+        return ps.run()
+
+    def run_with_nets(self):
+        ps = PokerSplit(None, nets=self.nets)
         return ps.run()
 
     def run_external(self):
