@@ -11,10 +11,12 @@ class getNets:
             chats = pickle.load(open(file, "rb"))
             for chat in chats:
                 if "added on" in chat:
+                    print(chat, sum(self.player_nets.values()))
                     player = chat.split(" ")[0]
                     amount = int(float(chat.split(" ")[3]) * 100)
                     self.update_player_net(player, -1 * amount)
                 if "stood up with" in chat:
+                    print(chat, sum(self.player_nets.values()))
                     player = chat.split(" ")[0]
                     amount = int(float(chat.split(" ")[4]) * 100)
                     self.update_player_net(player, amount)

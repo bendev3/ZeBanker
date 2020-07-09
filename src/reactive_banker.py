@@ -74,7 +74,7 @@ class ReactiveBanker:
                         send_groupme_messages(["Ok {}, getting results from {}".format(msg.name, tables)], self.bot_id, self.message)
                         if sum(nets.values()) != 0:
                             send_groupme_messages(
-                                ["nets don't sum to 0: {}".format(nets)],
+                                ["nets sum to {}: {}".format(sum(nets.values()), nets)],
                                 self.bot_id, self.message)
                         else:
                             self.banker = zeBanker(None, self.donk_group_id, self.output_dir, self.message, None, None, self.bot_id, nets)
