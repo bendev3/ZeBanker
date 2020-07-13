@@ -47,6 +47,16 @@ def send_groupme_messages(messages, bot_id, send_message=False):
         log("No message to send")
 
 
+def duplicate_at_start(l):
+    for i in range(len(l)):
+        if i > 2:
+            print(l[:i], l[i:2*i])
+            if l[:i] == l[i:2*i]:
+                print("Duplicate {} at start".format(l[:i]))
+                return True
+    return False
+
+
 def is_int(val):
     try:
         num = int(val)

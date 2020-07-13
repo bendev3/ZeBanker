@@ -4,7 +4,7 @@ import time
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import os
-from utils import log, get_pickle, set_pickle
+from utils import log, get_pickle, set_pickle, duplicate_at_start
 import argparse
 import html2text
 from datetime import datetime
@@ -111,7 +111,7 @@ class HistoryLogger:
             last_new_chat_length = None
         if len_new_chat > 400 or \
                 (last_new_chat_length is not None and last_new_chat_length > 110 and len_new_chat >= last_new_chat_length * 1.7) or \
-                (len_new_chat > 6 and new_chat[:int(len_new_chat/2)] == new_chat[int(len_new_chat/2):]):
+                (duplicate_at_start(new_chat)):
             new_chat = []
             log("New chat length {} exceeds 1.7x the last new chat length {} or max 400 or duplicate. Ignoring.".format(
                 len_new_chat, last_new_chat_length
