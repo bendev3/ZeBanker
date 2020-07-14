@@ -68,6 +68,7 @@ class ReactiveBanker:
                             tables = msg.text.split(":")[1].split(",")
                         else:
                             tables = [msg.text.split("/")[5]]
+                        log("Tables: {}".format(tables))
                         file_names = []
                         for table in tables:
                             file_name = "{}_{}_chat.pkl".format(self.donk_group_id, table)
