@@ -63,12 +63,12 @@ class ReactiveBanker:
                         num_tables = int(msg.text.replace("!results", ""))
                         send_groupme_messages(["Ok {}, getting results from the last {} table(s).".format(msg.name, num_tables)], self.bot_id, self.message)
                         self.banker = zeBanker(None, self.donk_group_id, self.output_dir, self.message, num_tables, None, self.bot_id)
-                    elif ":" in msg.text or "https://donkhouse.com/group/{}".format(self.donk_group_id) in msg.text:
-                        if ":" in msg.text:
-                            tables = msg.text.split(":")[1].split(",")
+                    elif ":" in msg.text or "donkhouse.com/group/{}".format(self.donk_group_id) in msg.text:
+                        if "donkhouse.com/group/{}".format(self.donk_group_id) in msg.text:
+                            tables = [msg.text.split("/")[-1]]
                         else:
-                            tables = [msg.text.split("/")[5]]
-                        log("Tables: {}".format(tables))
+                            tables = msg.text.split(":")[1].split(",")
+                        log("Tables to retrieve nets for: {}".format(tables))
                         file_names = []
                         for table in tables:
                             file_name = "{}_{}_chat.pkl".format(self.donk_group_id, table)
