@@ -131,8 +131,8 @@ class HistoryLogger:
                 set_pickle(consolodated_chat, self.download_dir, old_chat_filename)
             else:
                 log("Consolodated chat for table {} is None or len 0. Not saving.".format(table_id))
-                log("Old:{}\n".format(old_chat))
-                log("New:{}\n".format(new_chat))
+                #log("Old:{}\n".format(old_chat))
+                #log("New:{}\n".format(new_chat))
                 if len(old_chat) > 20:
                     log("End of old:{}\n".format(old_chat[-20:]))
                 if len(new_chat) > 20:
