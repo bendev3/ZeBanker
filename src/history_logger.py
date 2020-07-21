@@ -110,8 +110,8 @@ class HistoryLogger:
         else:
             last_new_chat_length = None
         if len_new_chat > 400 or \
-                (last_new_chat_length is not None and last_new_chat_length > 110 and len_new_chat >= last_new_chat_length * 1.7) or \
-                (duplicate_at_start(new_chat)):
+                (last_new_chat_length is not None and last_new_chat_length > 140 and len_new_chat >= last_new_chat_length * 1.7) or \
+                duplicate_at_start(new_chat):
             new_chat = []
             log("New chat length {} exceeds 1.7x the last new chat length {} or max 400 or duplicate. Ignoring.".format(
                 len_new_chat, last_new_chat_length
