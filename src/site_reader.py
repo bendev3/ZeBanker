@@ -154,10 +154,12 @@ class SiteReader:
 
 """
 # run this once to store cookies for a login
-def one_time_get_cookies():
-    driver = webdriver.Chrome()
-    driver.get('https://donkhouse.com/group/11395/44476')
-    time.sleep(15)
-    # manually enter user/password in the browser window
-    pickle.dump(driver.get_cookies(), open("cookies.pkl", "wb"))
+from selenium import webdriver
+import pickle
+import time 
+driver = webdriver.Chrome()
+driver.get('https://donkhouse.com/group/11395/44476')
+time.sleep(15)
+# manually enter user/password in the browser window
+pickle.dump(driver.get_cookies(), open("cookies.pkl", "wb"))
 """
