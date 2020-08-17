@@ -51,7 +51,7 @@ class PokerSplit:
 
     def print_contact_info(self):
         if len(self.players_info_dict) > 0:
-            s = "*** Venmo Info ***\n"
+            s = "*** Contact Info ***\n"
             for player, venmo in self.players_info_dict.items():
                 a = player + ": "
                 if venmo:
