@@ -52,7 +52,7 @@ class HistoryLogger:
                 log("Site not loaded yet", 2)
             time.sleep(1.0)
 
-    def get_chat_history(self, table_id, ignore_last):
+    def get_chat_history(self, table_id):
         self.open_any_table(table_id)
         script = "update_chat_mode(\"hand histories only\")"
         log("Executing script {}".format(script))
@@ -75,8 +75,6 @@ class HistoryLogger:
             return self.get_chat_history(table_id)  # try again, hope for no infinite recursion
         '''
         new_chat = [chat for chat in chat_text.splitlines() if "came through" not in chat and chat != '']
-        if len(new_chat) > ignore_last:
-            return new_chat[:len(new_chat) - ignore_last]
         return new_chat
 
     def finish(self):
@@ -103,7 +101,11 @@ class HistoryLogger:
     def update_chat_for_table(self, table_id, ignore_last):
         old_chat_filename = "{}_{}_chat.pkl".format(self.group_id, table_id)
         old_chat = get_pickle(self.download_dir, old_chat_filename) if os.path.isfile(os.path.join(self.download_dir, old_chat_filename)) else None
-        new_chat = self.get_chat_history(table_id, ignore_last)
+        new_chat_before_ignore_last = self.get_chat_history(table_id)
+        if len(new_chat_before_ignore_last) > ignore_last:
+            new_chat = new_chat_before_ignore_last[:len(new_chat_before_ignore_last) - ignore_last]
+        else:
+            new_chat = new_chat_before_ignore_last
         len_new_chat = len(new_chat)
         if table_id in self.last_new_chat_lengths:
             last_new_chat_length = self.last_new_chat_lengths[table_id]
@@ -111,7 +113,7 @@ class HistoryLogger:
             last_new_chat_length = None
         if len_new_chat > 400 or \
                 (last_new_chat_length is not None and last_new_chat_length > 140 and len_new_chat >= last_new_chat_length * 1.7) or \
-                duplicate_at_start(new_chat):
+                duplicate_at_start(new_chat_before_ignore_last):
             new_chat = []
             log("New chat length {} exceeds 1.7x the last new chat length {} or max 400 or duplicate. Ignoring.".format(
                 len_new_chat, last_new_chat_length
