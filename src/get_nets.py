@@ -1,5 +1,6 @@
 import argparse
 import pickle
+from utils import remove_duplicate_at_start
 
 class getNets:
     def __init__(self, files):
@@ -8,7 +9,7 @@ class getNets:
 
     def run(self):
         for file in self.files:
-            chats = pickle.load(open(file, "rb"))
+            chats = remove_duplicate_at_start(pickle.load(open(file, "rb")))
             for chat in chats:
                 if "added on" in chat:
                     player = chat.split(" ")[0]

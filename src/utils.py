@@ -55,6 +55,14 @@ def duplicate_at_start(l):
                 return True
     return False
 
+def remove_duplicate_at_start(l):
+    if l is not None:
+        for i in range(len(l)):
+            if i > 2:
+                if l[:i] == l[i:2*i]:
+                    print("Cutting out {} elements".format(i))
+                    return l[i:]
+    return l
 
 def is_int(val):
     try:
