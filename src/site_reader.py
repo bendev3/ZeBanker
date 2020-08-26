@@ -156,7 +156,7 @@ class SiteReader:
 # run this once to store cookies for a login
 from selenium import webdriver
 import pickle
-import time 
+import time
 driver = webdriver.Chrome()
 driver.get('https://donkhouse.com/group/11395/44476')
 time.sleep(15)
